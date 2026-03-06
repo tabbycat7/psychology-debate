@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}心灵辩论场{% endblock %} - 心理测评与疗愈平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        /* 页面切换动画 */
+        .page-enter {
+            animation: pageEnter 0.4s ease-out;
+        }
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* 步骤面板切换动画 */
+        .step-panel {
+            animation: stepFadeIn 0.35s ease-out;
+        }
+        @keyframes stepFadeIn {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- 浮动装饰 -->
+    <div class="floating-decoration circle-1"></div>
+    <div class="floating-decoration circle-2"></div>
+
+    <!-- 头部导航 -->
+    <header class="app-header">
+        <div class="header-inner">
+            <a href="{{ url_for('index') }}" class="logo-area">
+                <div class="logo-icon">🧠</div>
+                <span class="logo-text">心灵辩论场</span>
+            </a>
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">🏠 首页</a>
+                <a href="{{ url_for('history_page') }}" class="nav-link {% if request.endpoint == 'history_page' %}active{% endif %}">📋 历史记录</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 消息提示 -->
+    <div id="toast" class="toast"></div>
+
+    <!-- 主内容 -->
+    <main class="main-content page-enter">
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // 消息提示函数
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type + ' show';
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 通用 fetch 封装
+        async function apiFetch(url, options = {}) {
+            try {
+                const response = await fetch(url, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options,
+                });
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || '请求失败');
+                }
+                return data;
+            } catch (error) {
+                showToast(error.message, 'error');
+                throw error;
+            }
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

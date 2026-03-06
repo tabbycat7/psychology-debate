@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}辩论结果{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('index') }}" class="back-btn">← 返回首页</a>
+
+<div class="debate-container">
+    <!-- 辩题信息 -->
+    <div class="topic-header">
+        <h2>{{ session.topic_title }}</h2>
+        {% if topic %}
+        <p class="desc">{{ topic.description }}</p>
+        {% endif %}
+    </div>
+
+    <!-- 辩论信息概览 -->
+    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 200px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2);">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">辩手</div>
+            <div style="font-size: 16px; font-weight: 600;">{{ session.student_name }}</div>
+        </div>
+        <div style="flex: 1; min-width: 200px; padding: 16px 20px; border-radius: var(--radius-lg); background: {{ 'var(--success-bg)' if session.chosen_side == 'side_a' else 'var(--danger-bg)' }}; border: 1px solid {{ 'rgba(103,194,58,0.2)' if session.chosen_side == 'side_a' else 'rgba(245,108,108,0.2)' }};">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">立场</div>
+            <div style="font-size: 16px; font-weight: 600;">{{ '正方 👍' if session.chosen_side == 'side_a' else '反方 👎' }}</div>
+        </div>
+        <div style="flex: 1; min-width: 200px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--warning-bg); border: 1px solid rgba(230,162,60,0.2);">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">时间</div>
+            <div style="font-size: 16px; font-weight: 600;">{{ session.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+        </div>
+    </div>
+
+    <!-- 原始观点 -->
+    <div class="result-section">
+        <div class="result-card">
+            <div class="result-card-header">
+                <div class="result-card-icon user">🙋</div>
+                <div class="result-card-title">原始观点</div>
+            </div>
+            <div class="result-card-body">{{ session.user_argument }}</div>
+        </div>
+    </div>
+
+    <!-- 加持后观点 -->
+    {% if session.enhanced_argument %}
+    <div class="result-section">
+        <div class="result-card" style="border-color: rgba(64,158,255,0.3);">
+            <div class="result-card-header">
+                <div class="result-card-icon enhance">✨</div>
+                <div class="result-card-title" style="color: var(--primary);">加持后的观点</div>
+            </div>
+            <div class="result-card-body">{{ session.enhanced_argument }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- VS -->
+    {% if session.refutation %}
+    <div class="vs-divider">
+        <span class="vs-badge">⚔️ VS</span>
+    </div>
+
+    <!-- 反驳 -->
+    <div class="result-section">
+        <div class="result-card" style="border-color: rgba(245,108,108,0.3);">
+            <div class="result-card-header">
+                <div class="result-card-icon refute">🤖</div>
+                <div class="result-card-title" style="color: var(--danger);">AI 的反驳</div>
+                {% if session.refute_model_name %}
+                <span class="model-tag">{{ session.refute_model_name }}</span>
+                {% endif %}
+            </div>
+            <div class="result-card-body">{{ session.refutation }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- 标注结果 -->
+    {% if session.stance_changed is not none %}
+    <div style="margin-top: 32px; padding: 28px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            📝 复盘结果
+        </h3>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <span style="font-size: 15px; color: var(--text-regular);">立场变化：</span>
+            {% if session.stance_changed %}
+            <span class="status-tag changed">🔄 立场已改变</span>
+            {% else %}
+            <span class="status-tag unchanged">💪 坚持原立场</span>
+            {% endif %}
+        </div>
+        {% if session.annotation_note %}
+        <div style="padding: 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.6; color: var(--text-regular);">
+            {{ session.annotation_note }}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <!-- 未标注，显示标注入口 -->
+    <div class="text-center mt-8">
+        <a href="{{ url_for('annotate_page', session_id=session.id) }}" class="btn btn-success btn-lg">
+            📝 进行复盘标注
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- 操作按钮 -->
+    <div class="text-center mt-8" style="display: flex; justify-content: center; gap: 16px;">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">🎭 再来一场辩论</a>
+        <a href="{{ url_for('history_page') }}" class="btn btn-outline">📋 查看历史记录</a>
+    </div>
+</div>
+{% endblock %}

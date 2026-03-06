@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}历史记录{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+    <h1>📋 辩论历史</h1>
+    <p>查看所有辩论记录和标注情况</p>
+</div>
+
+{% if sessions %}
+<div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+    <div style="padding: 16px 24px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2); display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 24px;">📊</span>
+        <div>
+            <div style="font-size: 12px; color: var(--text-secondary);">总辩论次数</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--primary);">{{ sessions|length }}</div>
+        </div>
+    </div>
+    <div style="padding: 16px 24px; border-radius: var(--radius-lg); background: var(--success-bg); border: 1px solid rgba(103,194,58,0.2); display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 24px;">✅</span>
+        <div>
+            <div style="font-size: 12px; color: var(--text-secondary);">已标注</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--success);">{{ annotated_count }}</div>
+        </div>
+    </div>
+    <div style="padding: 16px 24px; border-radius: var(--radius-lg); background: var(--warning-bg); border: 1px solid rgba(230,162,60,0.2); display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 24px;">⏳</span>
+        <div>
+            <div style="font-size: 12px; color: var(--text-secondary);">待标注</div>
+            <div style="font-size: 20px; font-weight: 700; color: var(--warning);">{{ pending_count }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="history-table-wrap">
+    <table class="history-table">
+        <thead>
+            <tr>
+                <th>编号</th>
+                <th>辩手</th>
+                <th>辩题</th>
+                <th>立场</th>
+                <th>反驳模型</th>
+                <th>标注状态</th>
+                <th>时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sessions %}
+            <tr>
+                <td style="font-weight: 600; color: var(--text-secondary);">#{{ s.id }}</td>
+                <td>{{ s.student_name }}</td>
+                <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.topic_title }}</td>
+                <td>
+                    {% if s.chosen_side == 'side_a' %}
+                    <span class="status-tag unchanged">正方 👍</span>
+                    {% else %}
+                    <span class="status-tag changed">反方 👎</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if s.refute_model_name %}
+                    <span class="model-tag">{{ s.refute_model_name }}</span>
+                    {% else %}
+                    <span style="color: var(--text-placeholder);">-</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if s.stance_changed is not none %}
+                        {% if s.stance_changed %}
+                        <span class="status-tag changed">🔄 已改变</span>
+                        {% else %}
+                        <span class="status-tag unchanged">💪 未改变</span>
+                        {% endif %}
+                    {% else %}
+                    <span class="status-tag pending">⏳ 待标注</span>
+                    {% endif %}
+                </td>
+                <td style="white-space: nowrap; color: var(--text-secondary); font-size: 13px;">{{ s.created_at.strftime('%m-%d %H:%M') }}</td>
+                <td>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{{ url_for('result_page', session_id=s.id) }}" class="btn btn-sm btn-outline">查看</a>
+                        {% if s.stance_changed is none %}
+                        <a href="{{ url_for('annotate_page', session_id=s.id) }}" class="btn btn-sm btn-success">标注</a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">🎭</div>
+    <p>还没有辩论记录哦，快去开始第一场辩论吧！</p>
+    <a href="{{ url_for('index') }}" class="btn btn-primary mt-6">开始辩论</a>
+</div>
+{% endif %}
+{% endblock %}

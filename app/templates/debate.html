@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.title }}{% endblock %}
+
+{% block content %}
+<!-- 动态返回按钮 -->
+<a href="{{ url_for('index') }}" class="back-btn" id="backBtn" onclick="return handleBack(event)">← 返回选题</a>
+
+<!-- 步骤条 -->
+<div class="steps-bar">
+    <div class="step-item completed">
+        <div class="step-icon completed">✓</div>
+        <span class="step-label">选题</span>
+    </div>
+    <div class="step-line completed"></div>
+    <div class="step-item" id="step2">
+        <div class="step-icon active" id="step2Icon">2</div>
+        <span class="step-label">选立场</span>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-item" id="step3">
+        <div class="step-icon pending" id="step3Icon">3</div>
+        <span class="step-label">说观点</span>
+    </div>
+    <div class="step-line" id="line3"></div>
+    <div class="step-item" id="step4">
+        <div class="step-icon pending" id="step4Icon">4</div>
+        <span class="step-label">AI 交锋</span>
+    </div>
+    <div class="step-line" id="line4"></div>
+    <div class="step-item" id="step5">
+        <div class="step-icon pending" id="step5Icon">5</div>
+        <span class="step-label">复盘</span>
+    </div>
+</div>
+
+<div class="debate-container">
+    <!-- 辩题信息 -->
+    <div class="topic-header">
+        <h2>{{ topic.title }}</h2>
+        <p class="desc">{{ topic.description }}</p>
+    </div>
+
+    <!-- ============================================================
+         步骤2：选择立场
+         ============================================================ -->
+    <div id="stepStance" class="step-panel">
+        <div class="stance-section">
+            <h3>🎯 请选择你的立场</h3>
+            <div class="stance-cards">
+                <div class="stance-card side-a" id="sideACard" onclick="selectStance('side_a')">
+                    <span class="stance-emoji">👍</span>
+                    <div class="stance-label">正方</div>
+                    <div class="stance-text">{{ topic.side_a }}</div>
+                </div>
+                <div class="stance-card side-b" id="sideBCard" onclick="selectStance('side_b')">
+                    <span class="stance-emoji">👎</span>
+                    <div class="stance-label">反方</div>
+                    <div class="stance-text">{{ topic.side_b }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 姓名输入 -->
+        <div class="mb-6">
+            <h3 style="font-size:18px; font-weight:700; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                😊 你的名字（选填）
+            </h3>
+            <input type="text" class="name-input" id="studentName" placeholder="输入你的名字或昵称...">
+        </div>
+
+        <!-- 按钮组 -->
+        <div style="display: flex; justify-content: center; gap: 16px;" class="mt-6">
+            <a href="{{ url_for('index') }}" class="btn btn-outline btn-lg">
+                ← 返回选题
+            </a>
+            <button class="btn btn-primary btn-lg" id="toArgumentBtn" onclick="goToArgument()" disabled>
+                下一步：说观点 →
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         步骤3：输入观点
+         ============================================================ -->
+    <div id="stepArgument" class="step-panel" style="display: none;">
+        <!-- 已选立场提示 -->
+        <div id="chosenStanceBanner" style="padding: 16px 24px; border-radius: var(--radius-lg); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+            <span id="bannerEmoji" style="font-size: 28px;"></span>
+            <div>
+                <div style="font-size: 13px; color: var(--text-secondary);">你选择的立场</div>
+                <div id="bannerStanceText" style="font-size: 17px; font-weight: 600;"></div>
+            </div>
+        </div>
+
+        <div class="argument-section">
+            <h3>💡 说说你的观点</h3>
+            <textarea class="argument-textarea" id="userArgument"
+                placeholder="在这里写下你支持这个立场的理由吧！可以举例子、讲道理、说感受，怎么说都可以哦～ 😄"
+                oninput="updateCharCount()"></textarea>
+            <div class="char-count"><span id="charCount">0</span> / 500 字</div>
+        </div>
+
+        <!-- 按钮组 -->
+        <div style="display: flex; justify-content: center; gap: 16px;" class="mt-6">
+            <button class="btn btn-outline btn-lg" onclick="goBackToStance()">
+                ← 重新选立场
+            </button>
+            <button class="btn btn-primary btn-lg" id="submitBtn" onclick="submitDebate()" disabled>
+                🚀 开始辩论！
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         步骤4：AI 交锋（加持 + 反驳）
+         ============================================================ -->
+    <div id="stepBattle" class="step-panel" style="display: none;">
+        <!-- 学生原始观点 -->
+        <div class="result-section">
+            <div class="result-card">
+                <div class="result-card-header">
+                    <div class="result-card-icon user">🙋</div>
+                    <div class="result-card-title">你的原始观点</div>
+                    <span class="status-tag" id="stanceTag" style="margin-left:auto;"></span>
+                </div>
+                <div class="result-card-body" id="originalArgument"></div>
+            </div>
+        </div>
+
+        <!-- 加持润色 -->
+        <div class="result-section" id="enhanceSection" style="display: none;">
+            <div class="result-card" style="border-color: rgba(64,158,255,0.3);">
+                <div class="result-card-header">
+                    <div class="result-card-icon enhance">✨</div>
+                    <div class="result-card-title" style="color: var(--primary);">加持后的观点</div>
+                </div>
+                <div class="result-card-body" id="enhancedArgument"></div>
+            </div>
+        </div>
+
+        <!-- VS 分隔 -->
+        <div id="vsDivider" style="display: none;">
+            <div class="vs-divider">
+                <span class="vs-badge">⚔️ VS</span>
+            </div>
+        </div>
+
+        <!-- 反驳 -->
+        <div class="result-section" id="refuteSection" style="display: none;">
+            <div class="result-card" style="border-color: rgba(245,108,108,0.3);">
+                <div class="result-card-header">
+                    <div class="result-card-icon refute">🤖</div>
+                    <div class="result-card-title" style="color: var(--danger);">AI 的反驳</div>
+                    <span class="model-tag" id="modelTag"></span>
+                </div>
+                <div class="result-card-body" id="refutationContent"></div>
+            </div>
+        </div>
+
+        <!-- 加载指示器 -->
+        <div class="text-center mt-6" id="loadingArea">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span id="loadingText">正在召唤 AI...</span>
+            </div>
+        </div>
+
+        <!-- 进入复盘按钮（AI完成后显示） -->
+        <div id="toReviewArea" style="display: none;">
+            <div style="display: flex; justify-content: center; gap: 16px;" class="mt-6">
+                <button class="btn btn-outline btn-lg" onclick="goBackToArgument()">
+                    ← 修改观点重来
+                </button>
+                <button class="btn btn-success btn-lg" onclick="goToReview()">
+                    📝 进入复盘 →
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         步骤5：复盘标注
+         ============================================================ -->
+    <div id="stepReview" class="step-panel" style="display: none;">
+        <div class="annotate-section">
+            <h3>📝 辩论复盘</h3>
+            <p style="margin-bottom: 20px; color: var(--text-regular); font-size: 15px;">
+                看完 AI 的反驳后，你的想法有变化吗？
+            </p>
+            <div class="annotate-options">
+                <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)">
+                    <span class="option-icon">🔄</span>
+                    <span class="option-text">我的想法改变了</span>
+                </div>
+                <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)">
+                    <span class="option-icon">💪</span>
+                    <span class="option-text">我坚持原来的立场</span>
+                </div>
+            </div>
+            <textarea class="annotate-note" id="annotationNote"
+                placeholder="可以写写你现在的想法，或者对这次辩论的感受...（选填）"></textarea>
+            <div style="display: flex; justify-content: center; gap: 16px;">
+                <button class="btn btn-outline btn-lg" onclick="goBackToBattle()">
+                    ← 回看辩论
+                </button>
+                <button class="btn btn-success btn-lg" id="annotateBtn" onclick="submitAnnotation()" disabled>
+                    ✅ 提交复盘
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // 状态管理
+    let state = {
+        topicId: '{{ topic.id }}',
+        chosenSide: null,
+        sessionId: null,
+        stanceChanged: null,
+        currentStep: 2,  // 当前步骤：2=选立场, 3=说观点, 4=AI交锋, 5=复盘
+        battleDone: false, // AI 交锋是否完成
+    };
+
+    // ============================================================
+    // 步骤面板切换
+    // ============================================================
+    function showStep(step) {
+        state.currentStep = step;
+
+        // 隐藏所有步骤面板
+        document.querySelectorAll('.step-panel').forEach(p => p.style.display = 'none');
+
+        // 显示对应面板
+        const panels = { 2: 'stepStance', 3: 'stepArgument', 4: 'stepBattle', 5: 'stepReview' };
+        document.getElementById(panels[step]).style.display = 'block';
+
+        // 更新步骤条
+        updateStep(step);
+
+        // 更新返回按钮文字
+        updateBackBtn();
+
+        // 滚动到顶部
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // 更新返回按钮
+    function updateBackBtn() {
+        const btn = document.getElementById('backBtn');
+        const labels = {
+            2: '← 返回选题',
+            3: '← 返回选立场',
+            4: '← 返回修改观点',
+            5: '← 回看辩论',
+        };
+        btn.textContent = labels[state.currentStep] || '← 返回';
+    }
+
+    // 返回按钮处理
+    function handleBack(event) {
+        event.preventDefault();
+        if (state.currentStep === 2) {
+            // 第一步，返回首页
+            window.location.href = '{{ url_for("index") }}';
+        } else if (state.currentStep === 3) {
+            goBackToStance();
+        } else if (state.currentStep === 4) {
+            if (state.battleDone) {
+                // AI 已完成，允许回到观点页（重新来过）
+                goBackToArgument();
+            } else {
+                // AI 正在进行中，不允许返回
+                showToast('AI 正在思考中，请稍等...', 'info');
+            }
+        } else if (state.currentStep === 5) {
+            goBackToBattle();
+        }
+    }
+
+    // ============================================================
+    // 步骤2：选择立场
+    // ============================================================
+    function selectStance(side) {
+        state.chosenSide = side;
+        document.getElementById('sideACard').classList.toggle('selected', side === 'side_a');
+        document.getElementById('sideBCard').classList.toggle('selected', side === 'side_b');
+        document.getElementById('toArgumentBtn').disabled = false;
+    }
+
+    function goToArgument() {
+        if (!state.chosenSide) return;
+
+        // 更新已选立场提示
+        const isA = state.chosenSide === 'side_a';
+        const banner = document.getElementById('chosenStanceBanner');
+        banner.style.background = isA ? 'var(--primary-bg)' : 'var(--danger-bg)';
+        banner.style.border = isA ? '1px solid rgba(64,158,255,0.2)' : '1px solid rgba(245,108,108,0.2)';
+        document.getElementById('bannerEmoji').textContent = isA ? '👍' : '👎';
+        document.getElementById('bannerStanceText').textContent = isA ? '{{ topic.side_a }}' : '{{ topic.side_b }}';
+
+        showStep(3);
+    }
+
+    // ============================================================
+    // 步骤3：输入观点
+    // ============================================================
+    function updateCharCount() {
+        const textarea = document.getElementById('userArgument');
+        const count = textarea.value.length;
+        document.getElementById('charCount').textContent = count;
+        updateSubmitBtn();
+    }
+
+    function updateSubmitBtn() {
+        const btn = document.getElementById('submitBtn');
+        const hasArgument = document.getElementById('userArgument').value.trim().length > 10;
+        btn.disabled = !hasArgument;
+    }
+
+    function goBackToStance() {
+        showStep(2);
+    }
+
+    // ============================================================
+    // 步骤4：AI 交锋
+    // ============================================================
+    async function submitDebate() {
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ 提交中...';
+
+        // 重置交锋区状态
+        state.battleDone = false;
+        document.getElementById('enhanceSection').style.display = 'none';
+        document.getElementById('vsDivider').style.display = 'none';
+        document.getElementById('refuteSection').style.display = 'none';
+        document.getElementById('loadingArea').style.display = 'block';
+        document.getElementById('toReviewArea').style.display = 'none';
+
+        try {
+            // 1. 提交观点
+            const submitData = await apiFetch('/api/debate/submit', {
+                method: 'POST',
+                body: JSON.stringify({
+                    topic_id: state.topicId,
+                    student_name: document.getElementById('studentName').value || '匿名同学',
+                    chosen_side: state.chosenSide,
+                    user_argument: document.getElementById('userArgument').value,
+                }),
+            });
+
+            state.sessionId = submitData.session_id;
+
+            // 显示原始观点
+            document.getElementById('originalArgument').textContent = document.getElementById('userArgument').value;
+            document.getElementById('stanceTag').textContent = state.chosenSide === 'side_a' ? '正方' : '反方';
+            document.getElementById('stanceTag').className = 'status-tag ' + (state.chosenSide === 'side_a' ? 'unchanged' : 'changed');
+
+            // 切换到交锋步骤
+            showStep(4);
+
+            // 2. 调用加持模型
+            document.getElementById('loadingText').textContent = '✨ AI 正在加持你的观点...';
+
+            const enhanceData = await apiFetch(`/api/debate/enhance/${state.sessionId}`, {
+                method: 'POST',
+            });
+
+            document.getElementById('enhancedArgument').textContent = enhanceData.enhanced_argument;
+            document.getElementById('enhanceSection').style.display = 'block';
+            showToast('观点加持完成！', 'success');
+
+            // 3. 调用反驳模型
+            document.getElementById('loadingText').textContent = '🤖 AI 对手正在准备反驳...';
+
+            const refuteData = await apiFetch(`/api/debate/refute/${state.sessionId}`, {
+                method: 'POST',
+            });
+
+            document.getElementById('refutationContent').textContent = refuteData.refutation;
+            document.getElementById('modelTag').textContent = refuteData.model_name;
+            document.getElementById('vsDivider').style.display = 'block';
+            document.getElementById('refuteSection').style.display = 'block';
+
+            // 隐藏加载，显示操作按钮
+            document.getElementById('loadingArea').style.display = 'none';
+            document.getElementById('toReviewArea').style.display = 'block';
+
+            state.battleDone = true;
+            showToast('辩论完成！请进行复盘 📝', 'success');
+
+        } catch (error) {
+            btn.disabled = false;
+            btn.innerHTML = '🚀 开始辩论！';
+            // 如果失败，回到观点步骤
+            showStep(3);
+            console.error(error);
+        }
+    }
+
+    function goBackToArgument() {
+        // 恢复提交按钮
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = false;
+        btn.innerHTML = '🚀 开始辩论！';
+        showStep(3);
+    }
+
+    function goToReview() {
+        showStep(5);
+    }
+
+    // ============================================================
+    // 步骤5：复盘
+    // ============================================================
+    function goBackToBattle() {
+        showStep(4);
+    }
+
+    function selectAnnotation(changed) {
+        state.stanceChanged = changed;
+        document.getElementById('optionChanged').classList.toggle('selected', changed === true);
+        document.getElementById('optionUnchanged').classList.toggle('selected', changed === false);
+        document.getElementById('annotateBtn').disabled = false;
+    }
+
+    async function submitAnnotation() {
+        const btn = document.getElementById('annotateBtn');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ 提交中...';
+
+        try {
+            await apiFetch(`/api/annotate/${state.sessionId}`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    stance_changed: state.stanceChanged,
+                    annotation_note: document.getElementById('annotationNote').value,
+                }),
+            });
+
+            showToast('复盘提交成功！感谢你的参与 🎉', 'success');
+
+            // 跳转到结果页
+            setTimeout(() => {
+                window.location.href = `/result/${state.sessionId}`;
+            }, 1500);
+
+        } catch (error) {
+            btn.disabled = false;
+            btn.innerHTML = '✅ 提交复盘';
+        }
+    }
+
+    // ============================================================
+    // 更新步骤条
+    // ============================================================
+    function updateStep(currentStep) {
+        for (let i = 2; i <= 5; i++) {
+            const icon = document.getElementById(`step${i}Icon`);
+            if (!icon) continue;
+
+            if (i < currentStep) {
+                icon.className = 'step-icon completed';
+                icon.textContent = '✓';
+            } else if (i === currentStep) {
+                icon.className = 'step-icon active';
+                icon.textContent = i;
+            } else {
+                icon.className = 'step-icon pending';
+                icon.textContent = i;
+            }
+        }
+
+        for (let i = 2; i <= 4; i++) {
+            const line = document.getElementById(`line${i}`);
+            if (line) {
+                line.className = i < currentStep ? 'step-line completed' : 'step-line';
+            }
+        }
+    }
+</script>
+{% endblock %}
