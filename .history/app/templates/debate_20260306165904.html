@@ -279,11 +279,11 @@
                     </div>
                 </div>
                 <div class="eval-stars" id="stars_understandable">
-                    <button class="eval-star" onclick="rateStar('understandable', 1)" data-tip="完全听不懂 😵">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 2)" data-tip="有点难懂 🤔">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 3)" data-tip="基本能懂 😊">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 4)" data-tip="很好理解 👍">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 5)" data-tip="完全没问题！🎉">☆</button>
+                    <button class="eval-star" onclick="rateStar('understandable', 1)" data-tip="完全听不懂 😵">⭐</button>
+                    <button class="eval-star" onclick="rateStar('understandable', 2)" data-tip="有点难懂 🤔">⭐</button>
+                    <button class="eval-star" onclick="rateStar('understandable', 3)" data-tip="基本能懂 😊">⭐</button>
+                    <button class="eval-star" onclick="rateStar('understandable', 4)" data-tip="很好理解 👍">⭐</button>
+                    <button class="eval-star" onclick="rateStar('understandable', 5)" data-tip="完全没问题！🎉">⭐</button>
                 </div>
                 <div class="eval-feedback" id="feedback_understandable"></div>
             </div>
@@ -298,11 +298,11 @@
                     </div>
                 </div>
                 <div class="eval-stars" id="stars_seen">
-                    <button class="eval-star" onclick="rateStar('seen', 1)" data-tip="完全被忽视了 😢">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 2)" data-tip="感觉敷衍 😐">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 3)" data-tip="还行吧 🙂">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 4)" data-tip="挺认真的 😄">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 5)" data-tip="超级认真！🥰">☆</button>
+                    <button class="eval-star" onclick="rateStar('seen', 1)" data-tip="完全被忽视了 😢">⭐</button>
+                    <button class="eval-star" onclick="rateStar('seen', 2)" data-tip="感觉敷衍 😐">⭐</button>
+                    <button class="eval-star" onclick="rateStar('seen', 3)" data-tip="还行吧 🙂">⭐</button>
+                    <button class="eval-star" onclick="rateStar('seen', 4)" data-tip="挺认真的 😄">⭐</button>
+                    <button class="eval-star" onclick="rateStar('seen', 5)" data-tip="超级认真！🥰">⭐</button>
                 </div>
                 <div class="eval-feedback" id="feedback_seen"></div>
             </div>
@@ -317,11 +317,11 @@
                     </div>
                 </div>
                 <div class="eval-stars" id="stars_educational">
-                    <button class="eval-star" onclick="rateStar('educational', 1)" data-tip="毫无启发 😴">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 2)" data-tip="没什么感觉 😶">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 3)" data-tip="有一点启发 🤓">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 4)" data-tip="很有启发 🧠">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 5)" data-tip="脑洞大开！🚀">☆</button>
+                    <button class="eval-star" onclick="rateStar('educational', 1)" data-tip="毫无启发 😴">⭐</button>
+                    <button class="eval-star" onclick="rateStar('educational', 2)" data-tip="没什么感觉 😶">⭐</button>
+                    <button class="eval-star" onclick="rateStar('educational', 3)" data-tip="有一点启发 🤓">⭐</button>
+                    <button class="eval-star" onclick="rateStar('educational', 4)" data-tip="很有启发 🧠">⭐</button>
+                    <button class="eval-star" onclick="rateStar('educational', 5)" data-tip="脑洞大开！🚀">⭐</button>
                 </div>
                 <div class="eval-feedback" id="feedback_educational"></div>
             </div>
@@ -336,13 +336,11 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-                    <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)"
-                        style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
+                    <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)" style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
                         <span class="option-icon">🔄</span>
                         <span class="option-text">想法有变化</span>
                     </div>
-                    <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)"
-                        style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
+                    <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)" style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
                         <span class="option-icon">💪</span>
                         <span class="option-text">我还是坚持！</span>
                     </div>
@@ -368,23 +366,17 @@
                 <div class="eval-summary-bars">
                     <div class="eval-bar-row">
                         <span class="eval-bar-label">🧩 听得懂</span>
-                        <div class="eval-bar-track">
-                            <div class="eval-bar-fill" id="bar_understandable"></div>
-                        </div>
+                        <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_understandable"></div></div>
                         <span class="eval-bar-score" id="score_understandable">-</span>
                     </div>
                     <div class="eval-bar-row">
-                        <span class="eval-bar-label">💖 被看见</span>
-                        <div class="eval-bar-track">
-                            <div class="eval-bar-fill" id="bar_seen"></div>
-                        </div>
+                        <span class="eval-bar-label">💖 被重视</span>
+                        <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_seen"></div></div>
                         <span class="eval-bar-score" id="score_seen">-</span>
                     </div>
                     <div class="eval-bar-row">
                         <span class="eval-bar-label">💡 有启发</span>
-                        <div class="eval-bar-track">
-                            <div class="eval-bar-fill" id="bar_educational"></div>
-                        </div>
+                        <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_educational"></div></div>
                         <span class="eval-bar-score" id="score_educational">-</span>
                     </div>
                 </div>
@@ -772,7 +764,6 @@
     function goToReview() {
         document.getElementById('reviewRoundCounter').textContent = `共 ${state.currentRound} 轮`;
         showStep(5);
-        initStarHover();
     }
 
     // ============================================================
@@ -810,20 +801,10 @@
 
     function rateStar(dimension, score) {
         evalScores[dimension] = score;
-        renderStars(dimension, score);
-        const fb = feedbackTexts[dimension][score];
-        const feedbackEl = document.getElementById('feedback_' + dimension);
-        feedbackEl.innerHTML = `<span class="eval-fb-emoji">${fb[0]}</span><span class="eval-fb-text">${fb[1]}</span>`;
-        feedbackEl.classList.add('show');
-        updateEvalSummary();
-        checkCanSubmit();
-    }
-
-    function renderStars(dimension, highlightCount) {
         const container = document.getElementById('stars_' + dimension);
         const stars = container.querySelectorAll('.eval-star');
         stars.forEach((star, idx) => {
-            if (idx < highlightCount) {
+            if (idx < score) {
                 star.classList.add('active');
                 star.textContent = '⭐';
             } else {
@@ -831,25 +812,12 @@
                 star.textContent = '☆';
             }
         });
-    }
-
-    // 初始化星星悬停效果
-    function initStarHover() {
-        document.querySelectorAll('.eval-stars').forEach(container => {
-            const dimension = container.id.replace('stars_', '');
-            const stars = container.querySelectorAll('.eval-star');
-            stars.forEach((star, idx) => {
-                star.addEventListener('mouseenter', () => {
-                    // 悬停时高亮当前及左边所有星星
-                    renderStars(dimension, idx + 1);
-                });
-            });
-            container.addEventListener('mouseleave', () => {
-                // 鼠标离开后恢复为已选状态
-                const selected = evalScores[dimension] || 0;
-                renderStars(dimension, selected);
-            });
-        });
+        const fb = feedbackTexts[dimension][score];
+        const feedbackEl = document.getElementById('feedback_' + dimension);
+        feedbackEl.innerHTML = `<span class="eval-fb-emoji">${fb[0]}</span><span class="eval-fb-text">${fb[1]}</span>`;
+        feedbackEl.classList.add('show');
+        updateEvalSummary();
+        checkCanSubmit();
     }
 
     function updateEvalSummary() {

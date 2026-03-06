@@ -437,9 +437,6 @@
     // 初始化：恢复已有数据
     // ============================================================
     (function init() {
-        // 初始化星星悬停
-        initStarHover();
-
         // 恢复评分
         ['understandable', 'seen', 'educational'].forEach(dim => {
             if (evalScores[dim]) {

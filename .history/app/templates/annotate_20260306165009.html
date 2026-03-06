@@ -174,13 +174,11 @@
                 </div>
             </div>
             <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-                <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)"
-                    style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
+                <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)" style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
                     <span class="option-icon">🔄</span>
                     <span class="option-text">想法有变化</span>
                 </div>
-                <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)"
-                    style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
+                <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)" style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
                     <span class="option-icon">💪</span>
                     <span class="option-text">我还是坚持！</span>
                 </div>
@@ -219,23 +217,17 @@
             <div class="eval-summary-bars">
                 <div class="eval-bar-row">
                     <span class="eval-bar-label">🧩 听得懂</span>
-                    <div class="eval-bar-track">
-                        <div class="eval-bar-fill" id="bar_understandable"></div>
-                    </div>
+                    <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_understandable"></div></div>
                     <span class="eval-bar-score" id="score_understandable">-</span>
                 </div>
                 <div class="eval-bar-row">
                     <span class="eval-bar-label">💖 被重视</span>
-                    <div class="eval-bar-track">
-                        <div class="eval-bar-fill" id="bar_seen"></div>
-                    </div>
+                    <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_seen"></div></div>
                     <span class="eval-bar-score" id="score_seen">-</span>
                 </div>
                 <div class="eval-bar-row">
                     <span class="eval-bar-label">💡 有启发</span>
-                    <div class="eval-bar-track">
-                        <div class="eval-bar-fill" id="bar_educational"></div>
-                    </div>
+                    <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_educational"></div></div>
                     <span class="eval-bar-score" id="score_educational">-</span>
                 </div>
             </div>
@@ -261,8 +253,8 @@
     // ============================================================
     let evalScores = {
         understandable: {{ session.eval_understandable or 'null' }},
-    seen: { { session.eval_seen or 'null' } },
-    educational: { { session.eval_educational or 'null' } },
+        seen: {{ session.eval_seen or 'null' }},
+        educational: {{ session.eval_educational or 'null' }},
     };
     let stanceChanged = null;
 
@@ -308,11 +300,14 @@
     // ============================================================
     // 星级评分
     // ============================================================
-    function renderStars(dimension, highlightCount) {
+    function rateStar(dimension, score) {
+        evalScores[dimension] = score;
+
+        // 更新星星状态
         const container = document.getElementById('stars_' + dimension);
         const stars = container.querySelectorAll('.eval-star');
         stars.forEach((star, idx) => {
-            if (idx < highlightCount) {
+            if (idx < score) {
                 star.classList.add('active');
                 star.textContent = '⭐';
             } else {
@@ -320,11 +315,6 @@
                 star.textContent = '☆';
             }
         });
-    }
-
-    function rateStar(dimension, score) {
-        evalScores[dimension] = score;
-        renderStars(dimension, score);
 
         // 显示反馈文字
         const fb = feedbackTexts[dimension][score];
@@ -336,23 +326,6 @@
         updateSummary();
         // 检查是否可提交
         checkCanSubmit();
-    }
-
-    // 星星悬停效果
-    function initStarHover() {
-        document.querySelectorAll('.eval-stars').forEach(container => {
-            const dimension = container.id.replace('stars_', '');
-            const stars = container.querySelectorAll('.eval-star');
-            stars.forEach((star, idx) => {
-                star.addEventListener('mouseenter', () => {
-                    renderStars(dimension, idx + 1);
-                });
-            });
-            container.addEventListener('mouseleave', () => {
-                const selected = evalScores[dimension] || 0;
-                renderStars(dimension, selected);
-            });
-        });
     }
 
     function updateSummary() {
@@ -437,9 +410,6 @@
     // 初始化：恢复已有数据
     // ============================================================
     (function init() {
-        // 初始化星星悬停
-        initStarHover();
-
         // 恢复评分
         ['understandable', 'seen', 'educational'].forEach(dim => {
             if (evalScores[dim]) {
@@ -449,12 +419,11 @@
 
         // 恢复标注
         {% if session.stance_changed is not none %}
-        stanceChanged = {{ 'true' if session.stance_changed else 'false' }
-    };
-    document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
-    {% endif %}
+        stanceChanged = {{ 'true' if session.stance_changed else 'false' }};
+        document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
+        {% endif %}
 
-    checkCanSubmit();
-    }) ();
+        checkCanSubmit();
+    })();
 </script>
 {% endblock %}

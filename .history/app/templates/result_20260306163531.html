@@ -10,7 +10,6 @@
         gap: 16px;
         margin: 32px 0;
     }
-
     .round-divider::before,
     .round-divider::after {
         content: '';
@@ -18,7 +17,6 @@
         height: 1px;
         background: linear-gradient(90deg, transparent, var(--border-color), transparent);
     }
-
     .round-badge {
         padding: 6px 20px;
         border-radius: 9999px;
@@ -27,9 +25,8 @@
         background: linear-gradient(135deg, var(--primary), #6366f1);
         color: white;
         white-space: nowrap;
-        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+        box-shadow: 0 2px 8px rgba(64,158,255,0.3);
     }
-
     .round-counter {
         display: inline-flex;
         align-items: center;
@@ -38,7 +35,7 @@
         border-radius: 9999px;
         font-size: 13px;
         font-weight: 600;
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(99,102,241,0.1);
         color: #6366f1;
         margin-left: 8px;
     }
@@ -59,8 +56,7 @@
 
     <!-- 辩论信息概览 -->
     <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
-        <div
-            style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2);">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2);">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">辩手</div>
             <div style="font-size: 16px; font-weight: 600;">{{ session.student_name }}</div>
             {% if session.student_grade or session.student_age or session.student_gender %}
@@ -71,19 +67,15 @@
             </div>
             {% endif %}
         </div>
-        <div
-            style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: {{ 'var(--success-bg)' if session.chosen_side == 'side_a' else 'var(--danger-bg)' }}; border: 1px solid {{ 'rgba(103,194,58,0.2)' if session.chosen_side == 'side_a' else 'rgba(245,108,108,0.2)' }};">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: {{ 'var(--success-bg)' if session.chosen_side == 'side_a' else 'var(--danger-bg)' }}; border: 1px solid {{ 'rgba(103,194,58,0.2)' if session.chosen_side == 'side_a' else 'rgba(245,108,108,0.2)' }};">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">立场</div>
-            <div style="font-size: 16px; font-weight: 600;">{{ '正方 👍' if session.chosen_side == 'side_a' else '反方 👎'
-                }}</div>
+            <div style="font-size: 16px; font-weight: 600;">{{ '正方 👍' if session.chosen_side == 'side_a' else '反方 👎' }}</div>
         </div>
-        <div
-            style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">辩论轮数</div>
             <div style="font-size: 16px; font-weight: 600;">{{ session.total_rounds }} 轮</div>
         </div>
-        <div
-            style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--warning-bg); border: 1px solid rgba(230,162,60,0.2);">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--warning-bg); border: 1px solid rgba(230,162,60,0.2);">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">时间</div>
             <div style="font-size: 16px; font-weight: 600;">{{ session.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
         </div>
@@ -189,65 +181,47 @@
          学生测评结果
          ============================================================ -->
     {% if session.eval_understandable %}
-    <div
-        style="margin-top: 32px; padding: 28px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 50%, #fce4ec 100%);">
-        <h3
-            style="font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+    <div style="margin-top: 32px; padding: 28px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #e0f7fa 0%, #e8eaf6 50%, #fce4ec 100%);">
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
             🎯 AI 测评结果
         </h3>
         <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
             <!-- 能理解 -->
-            <div
-                style="flex: 1; min-width: 140px; padding: 16px; border-radius: var(--radius-lg); background: rgba(255,255,255,0.85); text-align: center;">
+            <div style="flex: 1; min-width: 140px; padding: 16px; border-radius: var(--radius-lg); background: rgba(255,255,255,0.85); text-align: center;">
                 <div style="font-size: 28px; margin-bottom: 6px;">🧩</div>
                 <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">听得懂</div>
                 <div style="font-size: 22px; font-weight: 800; color: var(--primary);">
-                    {{ session.eval_understandable }}<span
-                        style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">/5</span>
+                    {{ session.eval_understandable }}<span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">/5</span>
                 </div>
-                <div
-                    style="margin-top: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden;">
-                    <div
-                        style="height: 100%; width: {{ session.eval_understandable * 20 }}%; background: var(--primary); border-radius: 3px;">
-                    </div>
+                <div style="margin-top: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden;">
+                    <div style="height: 100%; width: {{ session.eval_understandable * 20 }}%; background: var(--primary); border-radius: 3px;"></div>
                 </div>
             </div>
             <!-- 被看见 -->
-            <div
-                style="flex: 1; min-width: 140px; padding: 16px; border-radius: var(--radius-lg); background: rgba(255,255,255,0.85); text-align: center;">
+            <div style="flex: 1; min-width: 140px; padding: 16px; border-radius: var(--radius-lg); background: rgba(255,255,255,0.85); text-align: center;">
                 <div style="font-size: 28px; margin-bottom: 6px;">💖</div>
-                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">被看见</div>
+                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">被重视</div>
                 <div style="font-size: 22px; font-weight: 800; color: #e6437a;">
-                    {{ session.eval_seen }}<span
-                        style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">/5</span>
+                    {{ session.eval_seen }}<span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">/5</span>
                 </div>
-                <div
-                    style="margin-top: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden;">
-                    <div
-                        style="height: 100%; width: {{ session.eval_seen * 20 }}%; background: #e6437a; border-radius: 3px;">
-                    </div>
+                <div style="margin-top: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden;">
+                    <div style="height: 100%; width: {{ session.eval_seen * 20 }}%; background: #e6437a; border-radius: 3px;"></div>
                 </div>
             </div>
             <!-- 懂教育 -->
-            <div
-                style="flex: 1; min-width: 140px; padding: 16px; border-radius: var(--radius-lg); background: rgba(255,255,255,0.85); text-align: center;">
+            <div style="flex: 1; min-width: 140px; padding: 16px; border-radius: var(--radius-lg); background: rgba(255,255,255,0.85); text-align: center;">
                 <div style="font-size: 28px; margin-bottom: 6px;">💡</div>
                 <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">有启发</div>
                 <div style="font-size: 22px; font-weight: 800; color: #e6a23c;">
-                    {{ session.eval_educational }}<span
-                        style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">/5</span>
+                    {{ session.eval_educational }}<span style="font-size: 13px; font-weight: 500; color: var(--text-secondary);">/5</span>
                 </div>
-                <div
-                    style="margin-top: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden;">
-                    <div
-                        style="height: 100%; width: {{ session.eval_educational * 20 }}%; background: #e6a23c; border-radius: 3px;">
-                    </div>
+                <div style="margin-top: 6px; height: 6px; border-radius: 3px; background: rgba(0,0,0,0.06); overflow: hidden;">
+                    <div style="height: 100%; width: {{ session.eval_educational * 20 }}%; background: #e6a23c; border-radius: 3px;"></div>
                 </div>
             </div>
         </div>
         {% if session.eval_comment %}
-        <div
-            style="padding: 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.6; color: var(--text-regular);">
+        <div style="padding: 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.6; color: var(--text-regular);">
             <span style="font-weight: 600;">💬 学生评价：</span>{{ session.eval_comment }}
         </div>
         {% endif %}
@@ -258,10 +232,8 @@
          标注结果
          ============================================================ -->
     {% if session.stance_changed is not none %}
-    <div
-        style="margin-top: 24px; padding: 28px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-        <h3
-            style="font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+    <div style="margin-top: 24px; padding: 28px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+        <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
             📝 复盘结果 <span class="round-counter">共 {{ session.total_rounds }} 轮</span>
         </h3>
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
@@ -273,8 +245,7 @@
             {% endif %}
         </div>
         {% if session.annotation_note %}
-        <div
-            style="padding: 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.6; color: var(--text-regular);">
+        <div style="padding: 16px; border-radius: var(--radius-md); background: rgba(255,255,255,0.7); font-size: 14px; line-height: 1.6; color: var(--text-regular);">
             {{ session.annotation_note }}
         </div>
         {% endif %}

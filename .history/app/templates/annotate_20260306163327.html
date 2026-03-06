@@ -19,10 +19,8 @@
     </div>
     <div id="reviewContent" class="eval-review-content" style="display: none;">
         <!-- 学生立场 -->
-        <div
-            style="padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2); margin-bottom: 12px;">
-            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">你的立场：{{ '正方 👍' if
-                session.chosen_side == 'side_a' else '反方 👎' }}</div>
+        <div style="padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2); margin-bottom: 12px;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">你的立场：{{ '正方 👍' if session.chosen_side == 'side_a' else '反方 👎' }}</div>
             <div style="font-size: 15px; font-weight: 500;">{{ session.chosen_side_text }}</div>
         </div>
 
@@ -66,8 +64,7 @@
         <!-- 后续轮次 -->
         {% for round in session.rounds %}
         <div class="vs-divider" style="margin-top: 20px;">
-            <span class="vs-badge" style="background: var(--primary-bg); color: var(--primary);">第 {{ round.round_number
-                }} 轮</span>
+            <span class="vs-badge" style="background: var(--primary-bg); color: var(--primary);">第 {{ round.round_number }} 轮</span>
         </div>
         <div class="result-card mb-4">
             <div class="result-card-header">
@@ -164,29 +161,6 @@
             <div class="eval-feedback" id="feedback_educational"></div>
         </div>
 
-        <!-- 维度4：立场是否改变 -->
-        <div class="eval-dimension" id="evalDim4">
-            <div class="eval-dim-header">
-                <span class="eval-dim-emoji">🤔</span>
-                <div class="eval-dim-info">
-                    <div class="eval-dim-title">你的想法变了吗？</div>
-                    <div class="eval-dim-desc">和 AI 辩论完之后，你还坚持自己最初的立场吗？还是被它说服了一点点？</div>
-                </div>
-            </div>
-            <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-                <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)"
-                    style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
-                    <span class="option-icon">🔄</span>
-                    <span class="option-text">想法有变化</span>
-                </div>
-                <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)"
-                    style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
-                    <span class="option-icon">💪</span>
-                    <span class="option-text">我还是坚持！</span>
-                </div>
-            </div>
-        </div>
-
         <!-- 自由评价 -->
         <div class="eval-comment-area">
             <div class="eval-dim-header" style="margin-bottom: 12px;">
@@ -200,55 +174,60 @@
                 placeholder="比如：AI 说的那个例子很有意思！/ 它好像没听懂我在说什么...">{{ session.eval_comment or '' }}</textarea>
         </div>
 
-        <!-- 标注备注（老师/研究者用） -->
-        <div class="eval-comment-area">
-            <div class="eval-dim-header" style="margin-bottom: 12px;">
-                <span class="eval-dim-emoji">📝</span>
-                <div class="eval-dim-info">
-                    <div class="eval-dim-title">标注备注</div>
-                    <div class="eval-dim-desc">老师 / 研究者可以在这里记录观察到的信息（选填）</div>
-                </div>
-            </div>
-            <textarea class="eval-comment-textarea" id="annotationNote"
-                placeholder="可以记录观察到的具体变化或其他信息...">{{ session.annotation_note or '' }}</textarea>
-        </div>
-
         <!-- 评分总览（动态显示） -->
         <div class="eval-summary" id="evalSummary" style="display: none;">
             <div class="eval-summary-title">📊 你的评分总览</div>
             <div class="eval-summary-bars">
                 <div class="eval-bar-row">
                     <span class="eval-bar-label">🧩 听得懂</span>
-                    <div class="eval-bar-track">
-                        <div class="eval-bar-fill" id="bar_understandable"></div>
-                    </div>
+                    <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_understandable"></div></div>
                     <span class="eval-bar-score" id="score_understandable">-</span>
                 </div>
                 <div class="eval-bar-row">
                     <span class="eval-bar-label">💖 被重视</span>
-                    <div class="eval-bar-track">
-                        <div class="eval-bar-fill" id="bar_seen"></div>
-                    </div>
+                    <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_seen"></div></div>
                     <span class="eval-bar-score" id="score_seen">-</span>
                 </div>
                 <div class="eval-bar-row">
                     <span class="eval-bar-label">💡 有启发</span>
-                    <div class="eval-bar-track">
-                        <div class="eval-bar-fill" id="bar_educational"></div>
-                    </div>
+                    <div class="eval-bar-track"><div class="eval-bar-fill" id="bar_educational"></div></div>
                     <span class="eval-bar-score" id="score_educational">-</span>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- 提交按钮 -->
-        <div class="text-center" style="margin-top: 24px;">
-            <button class="btn btn-success btn-lg" id="annotateBtn" onclick="submitAll()" disabled>
-                ✅ 提交复盘
-            </button>
-            <div class="eval-submit-hint" id="submitHint">
-                请完成三项评分和立场选择后即可提交 ☝️
+    <!-- ============================================================
+         人工标注区（老师/研究者用）
+         ============================================================ -->
+    <div class="annotate-section">
+        <h3>🏷️ 标注信息</h3>
+        <p style="margin-bottom: 20px; color: var(--text-regular); font-size: 15px;">
+            看完 AI 的反驳后，这位同学的立场是否发生了变化？
+        </p>
+
+        <div class="annotate-options">
+            <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)">
+                <span class="option-icon">🔄</span>
+                <span class="option-text">立场已改变</span>
             </div>
+            <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)">
+                <span class="option-icon">💪</span>
+                <span class="option-text">坚持原立场</span>
+            </div>
+        </div>
+
+        <textarea class="annotate-note" id="annotationNote"
+            placeholder="标注备注（选填）：可以记录观察到的具体变化或其他信息...">{{ session.annotation_note or '' }}</textarea>
+    </div>
+
+    <!-- 提交按钮 -->
+    <div class="text-center" style="margin-top: 32px; margin-bottom: 32px;">
+        <button class="btn btn-success btn-lg" id="annotateBtn" onclick="submitAll()" disabled>
+            ✅ 保存全部
+        </button>
+        <div class="eval-submit-hint" id="submitHint">
+            请先完成上方三项评分 ☝️
         </div>
     </div>
 </div>
@@ -261,8 +240,8 @@
     // ============================================================
     let evalScores = {
         understandable: {{ session.eval_understandable or 'null' }},
-    seen: { { session.eval_seen or 'null' } },
-    educational: { { session.eval_educational or 'null' } },
+        seen: {{ session.eval_seen or 'null' }},
+        educational: {{ session.eval_educational or 'null' }},
     };
     let stanceChanged = null;
 
@@ -308,11 +287,14 @@
     // ============================================================
     // 星级评分
     // ============================================================
-    function renderStars(dimension, highlightCount) {
+    function rateStar(dimension, score) {
+        evalScores[dimension] = score;
+
+        // 更新星星状态
         const container = document.getElementById('stars_' + dimension);
         const stars = container.querySelectorAll('.eval-star');
         stars.forEach((star, idx) => {
-            if (idx < highlightCount) {
+            if (idx < score) {
                 star.classList.add('active');
                 star.textContent = '⭐';
             } else {
@@ -320,11 +302,6 @@
                 star.textContent = '☆';
             }
         });
-    }
-
-    function rateStar(dimension, score) {
-        evalScores[dimension] = score;
-        renderStars(dimension, score);
 
         // 显示反馈文字
         const fb = feedbackTexts[dimension][score];
@@ -336,23 +313,6 @@
         updateSummary();
         // 检查是否可提交
         checkCanSubmit();
-    }
-
-    // 星星悬停效果
-    function initStarHover() {
-        document.querySelectorAll('.eval-stars').forEach(container => {
-            const dimension = container.id.replace('stars_', '');
-            const stars = container.querySelectorAll('.eval-star');
-            stars.forEach((star, idx) => {
-                star.addEventListener('mouseenter', () => {
-                    renderStars(dimension, idx + 1);
-                });
-            });
-            container.addEventListener('mouseleave', () => {
-                const selected = evalScores[dimension] || 0;
-                renderStars(dimension, selected);
-            });
-        });
     }
 
     function updateSummary() {
@@ -387,11 +347,10 @@
 
     function checkCanSubmit() {
         const allRated = evalScores.understandable && evalScores.seen && evalScores.educational;
-        const stanceSelected = stanceChanged !== null;
         const btn = document.getElementById('annotateBtn');
         const hint = document.getElementById('submitHint');
 
-        if (allRated && stanceSelected) {
+        if (allRated) {
             btn.disabled = false;
             hint.style.display = 'none';
         } else {
@@ -437,9 +396,6 @@
     // 初始化：恢复已有数据
     // ============================================================
     (function init() {
-        // 初始化星星悬停
-        initStarHover();
-
         // 恢复评分
         ['understandable', 'seen', 'educational'].forEach(dim => {
             if (evalScores[dim]) {
@@ -449,12 +405,11 @@
 
         // 恢复标注
         {% if session.stance_changed is not none %}
-        stanceChanged = {{ 'true' if session.stance_changed else 'false' }
-    };
-    document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
-    {% endif %}
+        stanceChanged = {{ 'true' if session.stance_changed else 'false' }};
+        document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
+        {% endif %}
 
-    checkCanSubmit();
-    }) ();
+        checkCanSubmit();
+    })();
 </script>
 {% endblock %}

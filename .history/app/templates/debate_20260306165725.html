@@ -259,148 +259,32 @@
     </div>
 
     <!-- ============================================================
-         步骤5：复盘测评
+         步骤5：复盘标注
          ============================================================ -->
     <div id="stepReview" class="step-panel" style="display: none;">
-        <div class="eval-section">
-            <div class="eval-header">
-                <span class="eval-header-emoji">🎯</span>
-                <h3>辩论复盘 <span class="round-counter" id="reviewRoundCounter"></span></h3>
-                <p>辩论结束啦！来给 AI 辩手打个分，也说说你的感受吧～</p>
-            </div>
-
-            <!-- 维度1：能理解 -->
-            <div class="eval-dimension">
-                <div class="eval-dim-header">
-                    <span class="eval-dim-emoji">🧩</span>
-                    <div class="eval-dim-info">
-                        <div class="eval-dim-title">听得懂吗？</div>
-                        <div class="eval-dim-desc">AI 说的话你能理解吗？它有没有用你听得懂的方式来讨论？</div>
-                    </div>
+        <div class="annotate-section">
+            <h3>📝 辩论复盘 <span class="round-counter" id="reviewRoundCounter"></span></h3>
+            <p style="margin-bottom: 20px; color: var(--text-regular); font-size: 15px;">
+                经过多轮辩论后，你的想法有变化吗？
+            </p>
+            <div class="annotate-options">
+                <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)">
+                    <span class="option-icon">🔄</span>
+                    <span class="option-text">我的想法改变了</span>
                 </div>
-                <div class="eval-stars" id="stars_understandable">
-                    <button class="eval-star" onclick="rateStar('understandable', 1)" data-tip="完全听不懂 😵">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 2)" data-tip="有点难懂 🤔">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 3)" data-tip="基本能懂 😊">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 4)" data-tip="很好理解 👍">☆</button>
-                    <button class="eval-star" onclick="rateStar('understandable', 5)" data-tip="完全没问题！🎉">☆</button>
-                </div>
-                <div class="eval-feedback" id="feedback_understandable"></div>
-            </div>
-
-            <!-- 维度2：被看见 -->
-            <div class="eval-dimension">
-                <div class="eval-dim-header">
-                    <span class="eval-dim-emoji">💖</span>
-                    <div class="eval-dim-info">
-                        <div class="eval-dim-title">被认真对待了吗？</div>
-                        <div class="eval-dim-desc">你觉得 AI 有没有认真听你说话？它的回应有没有让你感觉自己的想法被重视？</div>
-                    </div>
-                </div>
-                <div class="eval-stars" id="stars_seen">
-                    <button class="eval-star" onclick="rateStar('seen', 1)" data-tip="完全被忽视了 😢">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 2)" data-tip="感觉敷衍 😐">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 3)" data-tip="还行吧 🙂">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 4)" data-tip="挺认真的 😄">☆</button>
-                    <button class="eval-star" onclick="rateStar('seen', 5)" data-tip="超级认真！🥰">☆</button>
-                </div>
-                <div class="eval-feedback" id="feedback_seen"></div>
-            </div>
-
-            <!-- 维度3：懂教育 -->
-            <div class="eval-dimension">
-                <div class="eval-dim-header">
-                    <span class="eval-dim-emoji">💡</span>
-                    <div class="eval-dim-info">
-                        <div class="eval-dim-title">有没有让你动脑筋？</div>
-                        <div class="eval-dim-desc">AI 的反驳有没有让你重新想想自己的观点？有没有激发你新的灵感？</div>
-                    </div>
-                </div>
-                <div class="eval-stars" id="stars_educational">
-                    <button class="eval-star" onclick="rateStar('educational', 1)" data-tip="毫无启发 😴">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 2)" data-tip="没什么感觉 😶">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 3)" data-tip="有一点启发 🤓">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 4)" data-tip="很有启发 🧠">☆</button>
-                    <button class="eval-star" onclick="rateStar('educational', 5)" data-tip="脑洞大开！🚀">☆</button>
-                </div>
-                <div class="eval-feedback" id="feedback_educational"></div>
-            </div>
-
-            <!-- 维度4：立场是否改变 -->
-            <div class="eval-dimension">
-                <div class="eval-dim-header">
-                    <span class="eval-dim-emoji">🤔</span>
-                    <div class="eval-dim-info">
-                        <div class="eval-dim-title">你的想法变了吗？</div>
-                        <div class="eval-dim-desc">和 AI 辩论完之后，你还坚持自己最初的立场吗？还是被它说服了一点点？</div>
-                    </div>
-                </div>
-                <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
-                    <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)"
-                        style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
-                        <span class="option-icon">🔄</span>
-                        <span class="option-text">想法有变化</span>
-                    </div>
-                    <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)"
-                        style="flex: 1; min-width: 180px; margin: 0; text-align: center;">
-                        <span class="option-icon">💪</span>
-                        <span class="option-text">我还是坚持！</span>
-                    </div>
+                <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)">
+                    <span class="option-icon">💪</span>
+                    <span class="option-text">我坚持原来的立场</span>
                 </div>
             </div>
-
-            <!-- 自由评价 -->
-            <div class="eval-comment-area">
-                <div class="eval-dim-header" style="margin-bottom: 12px;">
-                    <span class="eval-dim-emoji">💬</span>
-                    <div class="eval-dim-info">
-                        <div class="eval-dim-title">还有什么想对 AI 说的？</div>
-                        <div class="eval-dim-desc">夸夸它？吐槽它？给它提建议？随便说～</div>
-                    </div>
-                </div>
-                <textarea class="eval-comment-textarea" id="evalComment"
-                    placeholder="比如：AI 说的那个例子很有意思！/ 它好像没听懂我在说什么..."></textarea>
-            </div>
-
-            <!-- 评分总览 -->
-            <div class="eval-summary" id="evalSummary" style="display: none;">
-                <div class="eval-summary-title">📊 你的评分总览</div>
-                <div class="eval-summary-bars">
-                    <div class="eval-bar-row">
-                        <span class="eval-bar-label">🧩 听得懂</span>
-                        <div class="eval-bar-track">
-                            <div class="eval-bar-fill" id="bar_understandable"></div>
-                        </div>
-                        <span class="eval-bar-score" id="score_understandable">-</span>
-                    </div>
-                    <div class="eval-bar-row">
-                        <span class="eval-bar-label">💖 被看见</span>
-                        <div class="eval-bar-track">
-                            <div class="eval-bar-fill" id="bar_seen"></div>
-                        </div>
-                        <span class="eval-bar-score" id="score_seen">-</span>
-                    </div>
-                    <div class="eval-bar-row">
-                        <span class="eval-bar-label">💡 有启发</span>
-                        <div class="eval-bar-track">
-                            <div class="eval-bar-fill" id="bar_educational"></div>
-                        </div>
-                        <span class="eval-bar-score" id="score_educational">-</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 按钮区 -->
-            <div style="display: flex; justify-content: center; gap: 16px; margin-top: 24px;">
+            <textarea class="annotate-note" id="annotationNote" placeholder="可以写写你现在的想法，或者对这次辩论的感受...（选填）"></textarea>
+            <div style="display: flex; justify-content: center; gap: 16px;">
                 <button class="btn btn-outline btn-lg" onclick="goBackToBattle()">
                     ← 回看辩论
                 </button>
                 <button class="btn btn-success btn-lg" id="annotateBtn" onclick="submitAnnotation()" disabled>
                     ✅ 提交复盘
                 </button>
-            </div>
-            <div class="eval-submit-hint" id="submitHint" style="text-align: center; margin-top: 10px;">
-                请完成三项评分和立场选择后即可提交 ☝️
             </div>
         </div>
     </div>
@@ -772,121 +656,20 @@
     function goToReview() {
         document.getElementById('reviewRoundCounter').textContent = `共 ${state.currentRound} 轮`;
         showStep(5);
-        initStarHover();
     }
 
     // ============================================================
-    // 步骤5：复盘测评
+    // 步骤5：复盘
     // ============================================================
-    let evalScores = { understandable: null, seen: null, educational: null };
-
-    const feedbackTexts = {
-        understandable: {
-            1: ['😵 完全听不懂呀！', '谢谢你的反馈，我们会让 AI 说得更简单！'],
-            2: ['🤔 有点难懂...', '收到！AI 需要学会用更简单的话来说。'],
-            3: ['😊 基本能理解', '不错，AI 的表达还算清楚～'],
-            4: ['👍 说得很清楚', '太好了！AI 的表达能力得到你的认可！'],
-            5: ['🎉 完全没问题！', '满分理解！AI 和你在同一个频道上！'],
-        },
-        seen: {
-            1: ['😢 被忽视了...', '对不起！AI 需要学会更认真地倾听你。'],
-            2: ['😐 感觉有点敷衍', '收到，AI 需要更用心地回应你的想法。'],
-            3: ['🙂 还行吧', 'AI 做得还可以，但还有进步空间～'],
-            4: ['😄 挺认真的！', '很高兴 AI 让你感受到被重视！'],
-            5: ['🥰 超级认真！', '太棒了！AI 真的在认真对待你的每一个想法！'],
-        },
-        educational: {
-            1: ['😴 毫无启发', '感谢诚实反馈！AI 需要学会更好地引导思考。'],
-            2: ['😶 没什么感觉', '收到，AI 的反驳还不够有深度。'],
-            3: ['🤓 有一点启发', '还不错！AI 的观点给了你一些新角度。'],
-            4: ['🧠 很有启发！', '太好了！AI 成功激发了你的思考！'],
-            5: ['🚀 脑洞大开！', '满分启发！AI 让你看到了全新的世界！'],
-        },
-    };
-
     function goBackToBattle() {
         showStep(4);
-    }
-
-    function rateStar(dimension, score) {
-        evalScores[dimension] = score;
-        renderStars(dimension, score);
-        const fb = feedbackTexts[dimension][score];
-        const feedbackEl = document.getElementById('feedback_' + dimension);
-        feedbackEl.innerHTML = `<span class="eval-fb-emoji">${fb[0]}</span><span class="eval-fb-text">${fb[1]}</span>`;
-        feedbackEl.classList.add('show');
-        updateEvalSummary();
-        checkCanSubmit();
-    }
-
-    function renderStars(dimension, highlightCount) {
-        const container = document.getElementById('stars_' + dimension);
-        const stars = container.querySelectorAll('.eval-star');
-        stars.forEach((star, idx) => {
-            if (idx < highlightCount) {
-                star.classList.add('active');
-                star.textContent = '⭐';
-            } else {
-                star.classList.remove('active');
-                star.textContent = '☆';
-            }
-        });
-    }
-
-    // 初始化星星悬停效果
-    function initStarHover() {
-        document.querySelectorAll('.eval-stars').forEach(container => {
-            const dimension = container.id.replace('stars_', '');
-            const stars = container.querySelectorAll('.eval-star');
-            stars.forEach((star, idx) => {
-                star.addEventListener('mouseenter', () => {
-                    // 悬停时高亮当前及左边所有星星
-                    renderStars(dimension, idx + 1);
-                });
-            });
-            container.addEventListener('mouseleave', () => {
-                // 鼠标离开后恢复为已选状态
-                const selected = evalScores[dimension] || 0;
-                renderStars(dimension, selected);
-            });
-        });
-    }
-
-    function updateEvalSummary() {
-        const allRated = evalScores.understandable && evalScores.seen && evalScores.educational;
-        const summary = document.getElementById('evalSummary');
-        if (allRated) {
-            summary.style.display = 'block';
-            const colors = { 1: '#f56c6c', 2: '#e6a23c', 3: '#909399', 4: '#67c23a', 5: '#409eff' };
-            ['understandable', 'seen', 'educational'].forEach(dim => {
-                const s = evalScores[dim];
-                document.getElementById('bar_' + dim).style.width = (s / 5 * 100) + '%';
-                document.getElementById('bar_' + dim).style.background = colors[s];
-                document.getElementById('score_' + dim).textContent = s + '/5';
-                document.getElementById('score_' + dim).style.color = colors[s];
-            });
-        }
     }
 
     function selectAnnotation(changed) {
         state.stanceChanged = changed;
         document.getElementById('optionChanged').classList.toggle('selected', changed === true);
         document.getElementById('optionUnchanged').classList.toggle('selected', changed === false);
-        checkCanSubmit();
-    }
-
-    function checkCanSubmit() {
-        const allRated = evalScores.understandable && evalScores.seen && evalScores.educational;
-        const stanceSelected = state.stanceChanged !== null;
-        const btn = document.getElementById('annotateBtn');
-        const hint = document.getElementById('submitHint');
-        if (allRated && stanceSelected) {
-            btn.disabled = false;
-            hint.style.display = 'none';
-        } else {
-            btn.disabled = true;
-            hint.style.display = 'block';
-        }
+        document.getElementById('annotateBtn').disabled = false;
     }
 
     async function submitAnnotation() {
@@ -898,12 +681,8 @@
             await apiFetch(`/api/annotate/${state.sessionId}`, {
                 method: 'POST',
                 body: JSON.stringify({
-                    eval_understandable: evalScores.understandable,
-                    eval_seen: evalScores.seen,
-                    eval_educational: evalScores.educational,
-                    eval_comment: document.getElementById('evalComment').value,
                     stance_changed: state.stanceChanged,
-                    annotation_note: '',
+                    annotation_note: document.getElementById('annotationNote').value,
                 }),
             });
 

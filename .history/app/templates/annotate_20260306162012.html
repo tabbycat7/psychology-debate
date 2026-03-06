@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}复盘标注{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('result_page', session_id=session.id) }}" class="back-btn">← 返回详情</a>
+
+<div class="debate-container">
+    <!-- 辩题信息 -->
+    <div class="topic-header" style="background: var(--gradient-sun);">
+        <h2>📝 辩论复盘</h2>
+        <p class="desc">{{ session.topic_title }}</p>
+    </div>
+
+    <!-- 辩论回顾 -->
+    <div style="margin-bottom: 32px;">
+        <h3
+            style="font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            📖 辩论回顾
+        </h3>
+
+        <!-- 学生立场 -->
+        <div
+            style="padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2); margin-bottom: 12px;">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">你的立场：{{ '正方 👍' if
+                session.chosen_side == 'side_a' else '反方 👎' }}</div>
+            <div style="font-size: 15px; font-weight: 500;">{{ session.chosen_side_text }}</div>
+        </div>
+
+        <!-- 原始观点 -->
+        <div class="result-card mb-4">
+            <div class="result-card-header">
+                <div class="result-card-icon user">🙋</div>
+                <div class="result-card-title">你的原始观点</div>
+            </div>
+            <div class="result-card-body">{{ session.user_argument }}</div>
+        </div>
+
+        <!-- 加持后 -->
+        {% if session.enhanced_argument %}
+        <div class="result-card mb-4" style="border-color: rgba(64,158,255,0.3);">
+            <div class="result-card-header">
+                <div class="result-card-icon enhance">✨</div>
+                <div class="result-card-title" style="color: var(--primary);">加持后的观点</div>
+            </div>
+            <div class="result-card-body">{{ session.enhanced_argument }}</div>
+        </div>
+        {% endif %}
+
+        <!-- 反驳 -->
+        {% if session.refutation %}
+        <div class="vs-divider">
+            <span class="vs-badge">⚔️ VS</span>
+        </div>
+        <div class="result-card" style="border-color: rgba(245,108,108,0.3);">
+            <div class="result-card-header">
+                <div class="result-card-icon refute">🤖</div>
+                <div class="result-card-title" style="color: var(--danger);">AI 的反驳</div>
+                {% if session.refute_model_name %}
+                <span class="model-tag">{{ session.refute_model_name }}</span>
+                {% endif %}
+            </div>
+            <div class="result-card-body">{{ session.refutation }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 标注区 -->
+    <div class="annotate-section">
+        <h3>🏷️ 标注信息</h3>
+        <p style="margin-bottom: 20px; color: var(--text-regular); font-size: 15px;">
+            看完 AI 的反驳后，这位同学的立场是否发生了变化？
+        </p>
+
+        <div class="annotate-options">
+            <div class="annotate-option" id="optionChanged" onclick="selectAnnotation(true)">
+                <span class="option-icon">🔄</span>
+                <span class="option-text">立场已改变</span>
+            </div>
+            <div class="annotate-option" id="optionUnchanged" onclick="selectAnnotation(false)">
+                <span class="option-icon">💪</span>
+                <span class="option-text">坚持原立场</span>
+            </div>
+        </div>
+
+        <textarea class="annotate-note" id="annotationNote"
+            placeholder="标注备注（选填）：可以记录观察到的具体变化或其他信息...">{{ session.annotation_note or '' }}</textarea>
+
+        <div class="text-center">
+            <button class="btn btn-success btn-lg" id="annotateBtn" onclick="submitAnnotation()" disabled>
+                ✅ 保存标注
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    let stanceChanged = null;
+
+    // 如果已有标注，恢复状态
+    {% if session.stance_changed is not none %}
+    stanceChanged = {{ 'true' if session.stance_changed else 'false' }};
+    document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
+    document.getElementById('annotateBtn').disabled = false;
+    {% endif %}
+
+    function selectAnnotation(changed) {
+        stanceChanged = changed;
+        document.getElementById('optionChanged').classList.toggle('selected', changed === true);
+        document.getElementById('optionUnchanged').classList.toggle('selected', changed === false);
+        document.getElementById('annotateBtn').disabled = false;
+    }
+
+    async function submitAnnotation() {
+        const btn = document.getElementById('annotateBtn');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ 保存中...';
+
+        try {
+            await apiFetch('/api/annotate/{{ session.id }}', {
+                method: 'POST',
+                body: JSON.stringify({
+                    stance_changed: stanceChanged,
+                    annotation_note: document.getElementById('annotationNote').value,
+                }),
+            });
+
+            showToast('标注保存成功！ 🎉', 'success');
+
+            setTimeout(() => {
+                window.location.href = '/result/{{ session.id }}';
+            }, 1500);
+
+        } catch (error) {
+            btn.disabled = false;
+            btn.innerHTML = '✅ 保存标注';
+        }
+    }
+</script>
+{% endblock %}

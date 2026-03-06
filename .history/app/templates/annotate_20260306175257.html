@@ -261,8 +261,8 @@
     // ============================================================
     let evalScores = {
         understandable: {{ session.eval_understandable or 'null' }},
-    seen: { { session.eval_seen or 'null' } },
-    educational: { { session.eval_educational or 'null' } },
+        seen: {{ session.eval_seen or 'null' }},
+        educational: {{ session.eval_educational or 'null' }},
     };
     let stanceChanged = null;
 
@@ -449,12 +449,11 @@
 
         // 恢复标注
         {% if session.stance_changed is not none %}
-        stanceChanged = {{ 'true' if session.stance_changed else 'false' }
-    };
-    document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
-    {% endif %}
+        stanceChanged = {{ 'true' if session.stance_changed else 'false' }};
+        document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
+        {% endif %}
 
-    checkCanSubmit();
-    }) ();
+        checkCanSubmit();
+    })();
 </script>
 {% endblock %}

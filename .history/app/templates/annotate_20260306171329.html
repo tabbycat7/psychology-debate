@@ -449,12 +449,11 @@
 
         // 恢复标注
         {% if session.stance_changed is not none %}
-        stanceChanged = {{ 'true' if session.stance_changed else 'false' }
-    };
-    document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
-    {% endif %}
+        stanceChanged = {{ 'true' if session.stance_changed else 'false' }};
+        document.getElementById(stanceChanged ? 'optionChanged' : 'optionUnchanged').classList.add('selected');
+        {% endif %}
 
-    checkCanSubmit();
+        checkCanSubmit();
     }) ();
 </script>
 {% endblock %}
