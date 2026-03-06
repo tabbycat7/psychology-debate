@@ -151,10 +151,10 @@ def enhance_argument(config, topic_title, side, user_argument, history=None):
     )
 
 
-def refute_argument(config, topic_title, side, enhanced_argument, history=None, fixed_model_name=None):
+def refute_argument(config, topic_title, side, enhanced_argument, history=None):
     """
     "反驳"模型：反驳学生的（已润色）观点
-    第一轮从配置的多个反驳模型中随机抽取一个，后续轮次复用同一模型
+    从配置的多个反驳模型中随机抽取一个进行回答
 
     参数:
         config: Flask app.config 对象
@@ -163,13 +163,12 @@ def refute_argument(config, topic_title, side, enhanced_argument, history=None, 
         enhanced_argument: 经过润色的观点
         history: 历史辩论记录列表（可选），格式：
             [{"enhanced": "加持后观点", "refutation": "AI反驳"}, ...]
-        fixed_model_name: 指定使用的模型名称（用于多轮辩论中保持模型一致）
 
     返回:
         tuple: (反驳内容, 使用的模型名称)
     """
-    # 如果指定了模型则复用，否则随机抽取
-    chosen_model_name = fixed_model_name if fixed_model_name else random.choice(config["REFUTE_MODEL_NAMES"])
+    # 从模型名称列表中随机抽取一个
+    chosen_model_name = random.choice(config["REFUTE_MODEL_NAMES"])
 
     system_prompt = (
         "你是一个辩论对手，你的任务是针对对方的观点进行有力的反驳。"

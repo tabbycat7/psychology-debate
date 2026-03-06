@@ -58,13 +58,12 @@ def debate_page(topic_id):
     return render_template('debate.html', topic=topic)
 
 
-@app.route('/result/<session_id>')
+@app.route('/result/<int:session_id>')
 def result_page(session_id):
     """辩论结果页面"""
     session = DebateSession.query.get_or_404(session_id)
     topic = get_topic_by_id(session.topic_id)
-    rounds = DebateRound.query.filter_by(session_id=session_id).order_by(DebateRound.round_number).all()
-    return render_template('result.html', session=session, topic=topic, rounds=rounds)
+    return render_template('result.html', session=session, topic=topic)
 
 
 @app.route('/history')
@@ -77,7 +76,7 @@ def history_page():
                            annotated_count=annotated_count, pending_count=pending_count)
 
 
-@app.route('/annotate/<session_id>')
+@app.route('/annotate/<int:session_id>')
 def annotate_page(session_id):
     """标注页面"""
     session = DebateSession.query.get_or_404(session_id)
@@ -102,9 +101,6 @@ def submit_debate():
     data = request.json
     topic_id = data.get('topic_id')
     student_name = data.get('student_name', '匿名同学')
-    student_age = data.get('student_age')
-    student_gender = data.get('student_gender')
-    student_grade = data.get('student_grade')
     chosen_side = data.get('chosen_side')
     user_argument = data.get('user_argument')
 
@@ -121,9 +117,6 @@ def submit_debate():
     # 创建辩论会话
     session = DebateSession(
         student_name=student_name,
-        student_age=student_age,
-        student_gender=student_gender,
-        student_grade=student_grade,
         topic_id=topic_id,
         topic_title=topic['title'],
         chosen_side=chosen_side,
@@ -140,7 +133,7 @@ def submit_debate():
     })
 
 
-@app.route('/api/debate/enhance/<session_id>', methods=['POST'])
+@app.route('/api/debate/enhance/<int:session_id>', methods=['POST'])
 def enhance(session_id):
     """
     调用"加持"模型润色学生观点
@@ -163,7 +156,7 @@ def enhance(session_id):
     })
 
 
-@app.route('/api/debate/refute/<session_id>', methods=['POST'])
+@app.route('/api/debate/refute/<int:session_id>', methods=['POST'])
 def refute(session_id):
     """
     调用"反驳"模型反驳学生观点
@@ -191,138 +184,7 @@ def refute(session_id):
     })
 
 
-@app.route('/api/debate/continue/<session_id>', methods=['POST'])
-def continue_debate(session_id):
-    """
-    继续辩论（新一轮）
-    请求参数:
-        user_argument: 学生针对AI反驳的回应
-    """
-    session = DebateSession.query.get_or_404(session_id)
-    data = request.json
-    user_argument = data.get('user_argument')
-
-    if not user_argument:
-        return jsonify({"success": False, "message": "请输入你的回应"}), 400
-
-    # 计算新轮次编号
-    new_round_number = session.total_rounds + 1
-
-    # 创建新轮次记录
-    debate_round = DebateRound(
-        session_id=session.id,
-        round_number=new_round_number,
-        user_argument=user_argument,
-    )
-    db.session.add(debate_round)
-    session.total_rounds = new_round_number
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "round_id": debate_round.id,
-        "round_number": new_round_number,
-        "message": "回应提交成功",
-    })
-
-
-def _build_debate_history(session, up_to_round=None):
-    """
-    构建辩论历史记录列表，供大模型参考。
-
-    参数:
-        session: DebateSession 对象
-        up_to_round: 构建到第几轮之前的历史（不含该轮），None 表示全部
-
-    返回:
-        list: [{"enhanced": ..., "refutation": ..., "user_reply": ...}, ...]
-    """
-    history = []
-
-    # 第1轮
-    history.append({
-        "enhanced": session.enhanced_argument,
-        "refutation": session.refutation,
-        "user_reply": None,  # 第1轮没有"回应"，后续轮次的 user_argument 才是回应
-    })
-
-    # 第2轮起
-    rounds = DebateRound.query.filter_by(session_id=session.id).order_by(DebateRound.round_number).all()
-    for r in rounds:
-        if up_to_round is not None and r.round_number >= up_to_round:
-            break
-        # 上一轮的 user_reply 就是本轮学生的 user_argument
-        if history:
-            history[-1]["user_reply"] = r.user_argument
-        history.append({
-            "enhanced": r.enhanced_argument,
-            "refutation": r.refutation,
-            "user_reply": None,
-        })
-
-    return history
-
-
-@app.route('/api/debate/enhance_round/<round_id>', methods=['POST'])
-def enhance_round(round_id):
-    """加持新一轮的学生观点（携带历史对话）"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    session = DebateSession.query.get_or_404(debate_round.session_id)
-
-    # 构建到当前轮次之前的历史
-    history = _build_debate_history(session, up_to_round=debate_round.round_number)
-
-    enhanced = enhance_argument(
-        config=app.config,
-        topic_title=session.topic_title,
-        side=session.chosen_side_text,
-        user_argument=debate_round.user_argument,
-        history=history,
-    )
-
-    debate_round.enhanced_argument = enhanced
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "enhanced_argument": enhanced,
-    })
-
-
-@app.route('/api/debate/refute_round/<round_id>', methods=['POST'])
-def refute_round(round_id):
-    """反驳新一轮的学生观点（携带历史对话，复用第一轮的反驳模型）"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    session = DebateSession.query.get_or_404(debate_round.session_id)
-
-    if not debate_round.enhanced_argument:
-        return jsonify({"success": False, "message": "请先进行加持润色"}), 400
-
-    # 构建到当前轮次之前的历史
-    history = _build_debate_history(session, up_to_round=debate_round.round_number)
-
-    # 复用第一轮选定的反驳模型
-    refutation, model_name = refute_argument(
-        config=app.config,
-        topic_title=session.topic_title,
-        side=session.chosen_side_text,
-        enhanced_argument=debate_round.enhanced_argument,
-        history=history,
-        fixed_model_name=session.refute_model_name,
-    )
-
-    debate_round.refutation = refutation
-    debate_round.refute_model_name = model_name
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "refutation": refutation,
-        "model_name": model_name,
-    })
-
-
-@app.route('/api/annotate/<session_id>', methods=['POST'])
+@app.route('/api/annotate/<int:session_id>', methods=['POST'])
 def annotate(session_id):
     """
     人工标注接口

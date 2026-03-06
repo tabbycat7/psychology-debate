@@ -102,9 +102,6 @@ def submit_debate():
     data = request.json
     topic_id = data.get('topic_id')
     student_name = data.get('student_name', '匿名同学')
-    student_age = data.get('student_age')
-    student_gender = data.get('student_gender')
-    student_grade = data.get('student_grade')
     chosen_side = data.get('chosen_side')
     user_argument = data.get('user_argument')
 
@@ -121,9 +118,6 @@ def submit_debate():
     # 创建辩论会话
     session = DebateSession(
         student_name=student_name,
-        student_age=student_age,
-        student_gender=student_gender,
-        student_grade=student_grade,
         topic_id=topic_id,
         topic_title=topic['title'],
         chosen_side=chosen_side,
@@ -140,7 +134,7 @@ def submit_debate():
     })
 
 
-@app.route('/api/debate/enhance/<session_id>', methods=['POST'])
+@app.route('/api/debate/enhance/<int:session_id>', methods=['POST'])
 def enhance(session_id):
     """
     调用"加持"模型润色学生观点
@@ -163,7 +157,7 @@ def enhance(session_id):
     })
 
 
-@app.route('/api/debate/refute/<session_id>', methods=['POST'])
+@app.route('/api/debate/refute/<int:session_id>', methods=['POST'])
 def refute(session_id):
     """
     调用"反驳"模型反驳学生观点
@@ -191,7 +185,7 @@ def refute(session_id):
     })
 
 
-@app.route('/api/debate/continue/<session_id>', methods=['POST'])
+@app.route('/api/debate/continue/<int:session_id>', methods=['POST'])
 def continue_debate(session_id):
     """
     继续辩论（新一轮）
@@ -263,7 +257,7 @@ def _build_debate_history(session, up_to_round=None):
     return history
 
 
-@app.route('/api/debate/enhance_round/<round_id>', methods=['POST'])
+@app.route('/api/debate/enhance_round/<int:round_id>', methods=['POST'])
 def enhance_round(round_id):
     """加持新一轮的学生观点（携带历史对话）"""
     debate_round = DebateRound.query.get_or_404(round_id)
@@ -289,9 +283,9 @@ def enhance_round(round_id):
     })
 
 
-@app.route('/api/debate/refute_round/<round_id>', methods=['POST'])
+@app.route('/api/debate/refute_round/<int:round_id>', methods=['POST'])
 def refute_round(round_id):
-    """反驳新一轮的学生观点（携带历史对话，复用第一轮的反驳模型）"""
+    """反驳新一轮的学生观点（携带历史对话）"""
     debate_round = DebateRound.query.get_or_404(round_id)
     session = DebateSession.query.get_or_404(debate_round.session_id)
 
@@ -301,14 +295,12 @@ def refute_round(round_id):
     # 构建到当前轮次之前的历史
     history = _build_debate_history(session, up_to_round=debate_round.round_number)
 
-    # 复用第一轮选定的反驳模型
     refutation, model_name = refute_argument(
         config=app.config,
         topic_title=session.topic_title,
         side=session.chosen_side_text,
         enhanced_argument=debate_round.enhanced_argument,
         history=history,
-        fixed_model_name=session.refute_model_name,
     )
 
     debate_round.refutation = refutation
@@ -322,7 +314,7 @@ def refute_round(round_id):
     })
 
 
-@app.route('/api/annotate/<session_id>', methods=['POST'])
+@app.route('/api/annotate/<int:session_id>', methods=['POST'])
 def annotate(session_id):
     """
     人工标注接口

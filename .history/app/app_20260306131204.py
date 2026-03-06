@@ -102,9 +102,6 @@ def submit_debate():
     data = request.json
     topic_id = data.get('topic_id')
     student_name = data.get('student_name', '匿名同学')
-    student_age = data.get('student_age')
-    student_gender = data.get('student_gender')
-    student_grade = data.get('student_grade')
     chosen_side = data.get('chosen_side')
     user_argument = data.get('user_argument')
 
@@ -121,9 +118,6 @@ def submit_debate():
     # 创建辩论会话
     session = DebateSession(
         student_name=student_name,
-        student_age=student_age,
-        student_gender=student_gender,
-        student_grade=student_grade,
         topic_id=topic_id,
         topic_title=topic['title'],
         chosen_side=chosen_side,

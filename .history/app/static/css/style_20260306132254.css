@@ -1295,10 +1295,7 @@ body::after {
    ============================================================ */
 .welcome-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -1308,7 +1305,6 @@ body::after {
     justify-content: center;
     padding: 20px;
 }
-
 .welcome-overlay.active {
     display: flex;
 }
@@ -1325,22 +1321,14 @@ body::after {
 }
 
 @keyframes welcomeSlideIn {
-    from {
-        opacity: 0;
-        transform: translateY(40px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .welcome-header {
     text-align: center;
     padding: 36px 32px 20px;
 }
-
 .welcome-header h2 {
     font-size: 28px;
     font-weight: 800;
@@ -1350,7 +1338,6 @@ body::after {
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
-
 .welcome-header p {
     font-size: 15px;
     color: var(--text-secondary);
@@ -1384,7 +1371,6 @@ body::after {
     transition: all 0.3s ease;
     box-sizing: border-box;
 }
-
 .welcome-input:focus {
     outline: none;
     border-color: var(--primary);
@@ -1397,19 +1383,16 @@ body::after {
     align-items: center;
     gap: 10px;
 }
-
 .welcome-age-input {
     width: 80px;
     text-align: center;
     -moz-appearance: textfield;
 }
-
 .welcome-age-input::-webkit-outer-spin-button,
 .welcome-age-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
 .welcome-age-btn {
     width: 44px;
     height: 44px;
@@ -1425,7 +1408,6 @@ body::after {
     justify-content: center;
     transition: all 0.2s ease;
 }
-
 .welcome-age-btn:hover {
     border-color: var(--primary);
     background: var(--primary-bg);
@@ -1437,7 +1419,6 @@ body::after {
     gap: 10px;
     flex-wrap: wrap;
 }
-
 .welcome-grade-options {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1456,12 +1437,10 @@ body::after {
     transition: all 0.2s ease;
     font-family: var(--font-family);
 }
-
 .welcome-option-btn:hover {
     border-color: var(--primary);
     background: var(--primary-bg);
 }
-
 .welcome-option-btn.selected {
     border-color: var(--primary);
     background: var(--primary);
@@ -1473,7 +1452,6 @@ body::after {
     padding: 20px 32px 32px;
     text-align: center;
 }
-
 .welcome-footer .btn {
     width: 100%;
     justify-content: center;

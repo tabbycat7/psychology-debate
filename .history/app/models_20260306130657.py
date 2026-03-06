@@ -25,9 +25,6 @@ class DebateSession(db.Model):
     id = db.Column(db.String(20), primary_key=True, default=generate_session_id)
     # 学生信息
     student_name = db.Column(db.String(100), nullable=False, default='匿名同学')
-    student_age = db.Column(db.Integer, nullable=True)
-    student_gender = db.Column(db.String(10), nullable=True)       # 男 / 女 / 其他
-    student_grade = db.Column(db.String(20), nullable=True)        # 如：小学三年级、初中一年级
 
     # 辩题信息
     topic_id = db.Column(db.String(50), nullable=False)
@@ -72,9 +69,6 @@ class DebateSession(db.Model):
         return {
             "id": self.id,
             "student_name": self.student_name,
-            "student_age": self.student_age,
-            "student_gender": self.student_gender,
-            "student_grade": self.student_grade,
             "topic_id": self.topic_id,
             "topic_title": self.topic_title,
             "chosen_side": self.chosen_side,

@@ -39,6 +39,7 @@
             <tr>
                 <th>编号</th>
                 <th>辩手</th>
+                <th>年级</th>
                 <th>辩题</th>
                 <th>立场</th>
                 <th>反驳模型</th>
@@ -51,7 +52,15 @@
             {% for s in sessions %}
             <tr>
                 <td style="font-weight: 600; color: var(--text-secondary);">#{{ s.id }}</td>
-                <td>{{ s.student_name }}</td>
+                <td>
+                    {{ s.student_name }}
+                    {% if s.student_gender or s.student_age %}
+                    <div style="font-size: 11px; color: var(--text-secondary);">
+                        {{ s.student_gender or '' }}{% if s.student_age %} {{ s.student_age }}岁{% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+                <td style="font-size: 13px;">{{ s.student_grade or '-' }}</td>
                 <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ s.topic_title }}</td>
                 <td>
                     {% if s.chosen_side == 'side_a' %}

@@ -1,33 +1,19 @@
 """
 数据库模型定义
 """
-import uuid
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
 
-def generate_session_id():
-    """生成 S- 前缀的会话ID"""
-    return f"S-{uuid.uuid4().hex[:12]}"
-
-
-def generate_round_id():
-    """生成 R- 前缀的轮次ID"""
-    return f"R-{uuid.uuid4().hex[:12]}"
-
-
 class DebateSession(db.Model):
     """辩论会话记录"""
     __tablename__ = 'debate_sessions'
 
-    id = db.Column(db.String(20), primary_key=True, default=generate_session_id)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     # 学生信息
     student_name = db.Column(db.String(100), nullable=False, default='匿名同学')
-    student_age = db.Column(db.Integer, nullable=True)
-    student_gender = db.Column(db.String(10), nullable=True)       # 男 / 女 / 其他
-    student_grade = db.Column(db.String(20), nullable=True)        # 如：小学三年级、初中一年级
 
     # 辩题信息
     topic_id = db.Column(db.String(50), nullable=False)
@@ -72,9 +58,6 @@ class DebateSession(db.Model):
         return {
             "id": self.id,
             "student_name": self.student_name,
-            "student_age": self.student_age,
-            "student_gender": self.student_gender,
-            "student_grade": self.student_grade,
             "topic_id": self.topic_id,
             "topic_title": self.topic_title,
             "chosen_side": self.chosen_side,
@@ -96,8 +79,8 @@ class DebateRound(db.Model):
     """辩论轮次记录（第2轮起）"""
     __tablename__ = 'debate_rounds'
 
-    id = db.Column(db.String(20), primary_key=True, default=generate_round_id)
-    session_id = db.Column(db.String(20), db.ForeignKey('debate_sessions.id'), nullable=False)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    session_id = db.Column(db.Integer, db.ForeignKey('debate_sessions.id'), nullable=False)
     round_number = db.Column(db.Integer, nullable=False)  # 轮次编号，从2开始
 
     # 学生本轮的回应

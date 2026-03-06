@@ -72,9 +72,6 @@ class DebateSession(db.Model):
         return {
             "id": self.id,
             "student_name": self.student_name,
-            "student_age": self.student_age,
-            "student_gender": self.student_gender,
-            "student_grade": self.student_grade,
             "topic_id": self.topic_id,
             "topic_title": self.topic_title,
             "chosen_side": self.chosen_side,

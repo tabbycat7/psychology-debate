@@ -2,6 +2,46 @@
 
 {% block title %}辩论结果{% endblock %}
 
+{% block extra_head %}
+<style>
+    .round-divider {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin: 32px 0;
+    }
+    .round-divider::before,
+    .round-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+    }
+    .round-badge {
+        padding: 6px 20px;
+        border-radius: 9999px;
+        font-size: 14px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary), #6366f1);
+        color: white;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(64,158,255,0.3);
+    }
+    .round-counter {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 14px;
+        border-radius: 9999px;
+        font-size: 13px;
+        font-weight: 600;
+        background: rgba(99,102,241,0.1);
+        color: #6366f1;
+        margin-left: 8px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <a href="{{ url_for('index') }}" class="back-btn">← 返回首页</a>
 
@@ -16,20 +56,34 @@
 
     <!-- 辩论信息概览 -->
     <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
-        <div style="flex: 1; min-width: 200px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2);">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.2);">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">辩手</div>
             <div style="font-size: 16px; font-weight: 600;">{{ session.student_name }}</div>
+            {% if session.student_grade or session.student_age or session.student_gender %}
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                {% if session.student_gender %}{{ session.student_gender }}{% endif %}
+                {% if session.student_age %} · {{ session.student_age }}岁{% endif %}
+                {% if session.student_grade %} · {{ session.student_grade }}{% endif %}
+            </div>
+            {% endif %}
         </div>
-        <div style="flex: 1; min-width: 200px; padding: 16px 20px; border-radius: var(--radius-lg); background: {{ 'var(--success-bg)' if session.chosen_side == 'side_a' else 'var(--danger-bg)' }}; border: 1px solid {{ 'rgba(103,194,58,0.2)' if session.chosen_side == 'side_a' else 'rgba(245,108,108,0.2)' }};">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: {{ 'var(--success-bg)' if session.chosen_side == 'side_a' else 'var(--danger-bg)' }}; border: 1px solid {{ 'rgba(103,194,58,0.2)' if session.chosen_side == 'side_a' else 'rgba(245,108,108,0.2)' }};">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">立场</div>
             <div style="font-size: 16px; font-weight: 600;">{{ '正方 👍' if session.chosen_side == 'side_a' else '反方 👎' }}</div>
         </div>
-        <div style="flex: 1; min-width: 200px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--warning-bg); border: 1px solid rgba(230,162,60,0.2);">
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2);">
+            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">辩论轮数</div>
+            <div style="font-size: 16px; font-weight: 600;">{{ session.total_rounds }} 轮</div>
+        </div>
+        <div style="flex: 1; min-width: 150px; padding: 16px 20px; border-radius: var(--radius-lg); background: var(--warning-bg); border: 1px solid rgba(230,162,60,0.2);">
             <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">时间</div>
             <div style="font-size: 16px; font-weight: 600;">{{ session.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
         </div>
     </div>
 
+    <!-- ============================================================
+         第 1 轮
+         ============================================================ -->
     <!-- 原始观点 -->
     <div class="result-section">
         <div class="result-card">
@@ -54,13 +108,11 @@
     </div>
     {% endif %}
 
-    <!-- VS -->
+    <!-- VS + 反驳 -->
     {% if session.refutation %}
     <div class="vs-divider">
         <span class="vs-badge">⚔️ VS</span>
     </div>
-
-    <!-- 反驳 -->
     <div class="result-section">
         <div class="result-card" style="border-color: rgba(245,108,108,0.3);">
             <div class="result-card-header">
@@ -75,11 +127,63 @@
     </div>
     {% endif %}
 
-    <!-- 标注结果 -->
+    <!-- ============================================================
+         第 2 轮及之后
+         ============================================================ -->
+    {% for round in rounds %}
+    <div class="round-divider">
+        <span class="round-badge">第 {{ round.round_number }} 轮</span>
+    </div>
+
+    <!-- 学生回应 -->
+    <div class="result-section">
+        <div class="result-card">
+            <div class="result-card-header">
+                <div class="result-card-icon user">🙋</div>
+                <div class="result-card-title">你的回应</div>
+            </div>
+            <div class="result-card-body">{{ round.user_argument }}</div>
+        </div>
+    </div>
+
+    {% if round.enhanced_argument %}
+    <div class="result-section">
+        <div class="result-card" style="border-color: rgba(64,158,255,0.3);">
+            <div class="result-card-header">
+                <div class="result-card-icon enhance">✨</div>
+                <div class="result-card-title" style="color: var(--primary);">加持后的观点</div>
+            </div>
+            <div class="result-card-body">{{ round.enhanced_argument }}</div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if round.refutation %}
+    <div class="vs-divider">
+        <span class="vs-badge">⚔️ VS</span>
+    </div>
+    <div class="result-section">
+        <div class="result-card" style="border-color: rgba(245,108,108,0.3);">
+            <div class="result-card-header">
+                <div class="result-card-icon refute">🤖</div>
+                <div class="result-card-title" style="color: var(--danger);">AI 的反驳</div>
+                {% if round.refute_model_name %}
+                <span class="model-tag">{{ round.refute_model_name }}</span>
+                {% endif %}
+            </div>
+            <div class="result-card-body">{{ round.refutation }}</div>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+
+    <!-- ============================================================
+         标注结果
+         ============================================================ -->
     {% if session.stance_changed is not none %}
     <div style="margin-top: 32px; padding: 28px; border-radius: var(--radius-xl); background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
         <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-            📝 复盘结果
+            📝 复盘结果 <span class="round-counter">共 {{ session.total_rounds }} 轮</span>
         </h3>
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
             <span style="font-size: 15px; color: var(--text-regular);">立场变化：</span>

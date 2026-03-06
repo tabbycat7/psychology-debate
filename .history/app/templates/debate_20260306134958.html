@@ -11,7 +11,6 @@
         gap: 16px;
         margin: 32px 0;
     }
-
     .round-divider::before,
     .round-divider::after {
         content: '';
@@ -19,7 +18,6 @@
         height: 1px;
         background: linear-gradient(90deg, transparent, var(--border-color), transparent);
     }
-
     .round-badge {
         padding: 6px 20px;
         border-radius: 9999px;
@@ -28,7 +26,7 @@
         background: linear-gradient(135deg, var(--primary), #6366f1);
         color: white;
         white-space: nowrap;
-        box-shadow: 0 2px 8px rgba(64, 158, 255, 0.3);
+        box-shadow: 0 2px 8px rgba(64,158,255,0.3);
     }
 
     /* 继续辩论输入区 */
@@ -40,7 +38,6 @@
         backdrop-filter: blur(12px);
         border: 1px solid var(--border-color);
     }
-
     .continue-section h4 {
         font-size: 18px;
         font-weight: 700;
@@ -49,7 +46,6 @@
         align-items: center;
         gap: 8px;
     }
-
     .continue-textarea {
         width: 100%;
         min-height: 140px;
@@ -63,13 +59,11 @@
         resize: vertical;
         transition: border-color 0.3s ease;
     }
-
     .continue-textarea:focus {
         outline: none;
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.1);
+        box-shadow: 0 0 0 3px rgba(64,158,255,0.1);
     }
-
     .continue-actions {
         display: flex;
         justify-content: center;
@@ -91,7 +85,7 @@
         border-radius: 9999px;
         font-size: 13px;
         font-weight: 600;
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(99,102,241,0.1);
         color: #6366f1;
         margin-left: 8px;
     }
@@ -159,8 +153,7 @@
 
         <!-- 用户信息（自动填充） -->
         <div class="mb-6" id="profilePreview" style="display:none;">
-            <div
-                style="padding: 14px 22px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.15); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+            <div style="padding: 14px 22px; border-radius: var(--radius-lg); background: var(--primary-bg); border: 1px solid rgba(64,158,255,0.15); display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
                 <span style="font-size: 22px;">😊</span>
                 <span id="profileDisplayName" style="font-weight: 600; font-size: 16px;"></span>
                 <span class="model-tag" id="profileDisplayGrade"></span>
@@ -185,8 +178,7 @@
          ============================================================ -->
     <div id="stepArgument" class="step-panel" style="display: none;">
         <!-- 已选立场提示 -->
-        <div id="chosenStanceBanner"
-            style="padding: 16px 24px; border-radius: var(--radius-lg); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+        <div id="chosenStanceBanner" style="padding: 16px 24px; border-radius: var(--radius-lg); margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
             <span id="bannerEmoji" style="font-size: 28px;"></span>
             <div>
                 <div style="font-size: 13px; color: var(--text-secondary);">你选择的立场</div>
@@ -197,10 +189,10 @@
         <div class="argument-section">
             <h3>💡 说说你的观点</h3>
             <textarea class="argument-textarea" id="userArgument"
-                placeholder="在这里写下你支持这个立场的理由吧！可以举例子、讲道理、说感受，怎么说都可以哦～ 😄" oninput="updateCharCount()"></textarea>
+                placeholder="在这里写下你支持这个立场的理由吧！可以举例子、讲道理、说感受，怎么说都可以哦～ 😄"
+                oninput="updateCharCount()"></textarea>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                <div class="char-hint" id="charHint"
-                    style="font-size: 13px; color: var(--warning); opacity: 0; transition: opacity 0.3s;">
+                <div class="char-hint" id="charHint" style="font-size: 13px; color: var(--warning); opacity: 0; transition: opacity 0.3s;">
                     ✏️ 至少写 10 个字才能开始辩论哦～
                 </div>
                 <div class="char-count"><span id="charCount">0</span> / 500 字</div>
@@ -243,7 +235,8 @@
                 <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 14px;">
                     看完 AI 的反驳，你有什么想说的？写下你的回应继续辩论，或者点击"结束辩论"进入复盘。
                 </p>
-                <textarea class="continue-textarea" id="continueArgument" placeholder="针对 AI 的反驳，写下你的回应..."
+                <textarea class="continue-textarea" id="continueArgument"
+                    placeholder="针对 AI 的反驳，写下你的回应..."
                     oninput="updateContinueBtn()"></textarea>
             </div>
 
@@ -277,7 +270,8 @@
                     <span class="option-text">我坚持原来的立场</span>
                 </div>
             </div>
-            <textarea class="annotate-note" id="annotationNote" placeholder="可以写写你现在的想法，或者对这次辩论的感受...（选填）"></textarea>
+            <textarea class="annotate-note" id="annotationNote"
+                placeholder="可以写写你现在的想法，或者对这次辩论的感受...（选填）"></textarea>
             <div style="display: flex; justify-content: center; gap: 16px;">
                 <button class="btn btn-outline btn-lg" onclick="goBackToBattle()">
                     ← 回看辩论

@@ -47,6 +47,64 @@
     <!-- 消息提示 -->
     <div id="toast" class="toast"></div>
 
+    <!-- ============================================================
+         首次访问欢迎弹窗
+         ============================================================ -->
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-modal">
+            <div class="welcome-header">
+                <span style="font-size: 48px;">👋</span>
+                <h2>欢迎来到心灵辩论场！</h2>
+                <p>在开始之前，请先告诉我们一些基本信息吧</p>
+            </div>
+            <div class="welcome-form">
+                <div class="welcome-field">
+                    <label class="welcome-label">😊 你的名字</label>
+                    <input type="text" class="welcome-input" id="profileName" placeholder="输入你的名字或昵称...">
+                </div>
+                <div class="welcome-field">
+                    <label class="welcome-label">🎂 你的年龄</label>
+                    <div class="welcome-age-row">
+                        <button class="welcome-age-btn" onclick="adjustAge(-1)">−</button>
+                        <input type="number" class="welcome-input welcome-age-input" id="profileAge" value="12" min="6" max="18">
+                        <button class="welcome-age-btn" onclick="adjustAge(1)">+</button>
+                        <span style="font-size: 15px; color: var(--text-secondary); margin-left: 4px;">岁</span>
+                    </div>
+                </div>
+                <div class="welcome-field">
+                    <label class="welcome-label">🧑 你的性别</label>
+                    <div class="welcome-options" id="genderOptions">
+                        <button class="welcome-option-btn" onclick="selectGender('男', this)">👦 男</button>
+                        <button class="welcome-option-btn" onclick="selectGender('女', this)">👧 女</button>
+                        <button class="welcome-option-btn" onclick="selectGender('其他', this)">🌈 其他</button>
+                    </div>
+                </div>
+                <div class="welcome-field">
+                    <label class="welcome-label">📚 你的年级</label>
+                    <div class="welcome-options welcome-grade-options" id="gradeOptions">
+                        <button class="welcome-option-btn" onclick="selectGrade('小学一年级', this)">小学一年级</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('小学二年级', this)">小学二年级</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('小学三年级', this)">小学三年级</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('小学四年级', this)">小学四年级</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('小学五年级', this)">小学五年级</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('小学六年级', this)">小学六年级</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('初中一年级', this)">初一</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('初中二年级', this)">初二</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('初中三年级', this)">初三</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('高中一年级', this)">高一</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('高中二年级', this)">高二</button>
+                        <button class="welcome-option-btn" onclick="selectGrade('高中三年级', this)">高三</button>
+                    </div>
+                </div>
+            </div>
+            <div class="welcome-footer">
+                <button class="btn btn-primary btn-lg" id="welcomeSubmitBtn" onclick="submitProfile()" disabled>
+                    开始探索 🚀
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 主内容 -->
     <main class="main-content page-enter">
         {% block content %}{% endblock %}
@@ -80,6 +138,68 @@
                 throw error;
             }
         }
+
+        // ============================================================
+        // 用户档案管理（localStorage）
+        // ============================================================
+        let _profileGender = '';
+        let _profileGrade = '';
+
+        function getUserProfile() {
+            const raw = localStorage.getItem('userProfile');
+            return raw ? JSON.parse(raw) : null;
+        }
+
+        function adjustAge(delta) {
+            const input = document.getElementById('profileAge');
+            let val = parseInt(input.value) + delta;
+            val = Math.max(6, Math.min(18, val));
+            input.value = val;
+        }
+
+        function selectGender(gender, btn) {
+            _profileGender = gender;
+            document.querySelectorAll('#genderOptions .welcome-option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            checkProfileComplete();
+        }
+
+        function selectGrade(grade, btn) {
+            _profileGrade = grade;
+            document.querySelectorAll('#gradeOptions .welcome-option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            checkProfileComplete();
+        }
+
+        function checkProfileComplete() {
+            const name = document.getElementById('profileName').value.trim();
+            const age = document.getElementById('profileAge').value;
+            const btn = document.getElementById('welcomeSubmitBtn');
+            btn.disabled = !(name && age && _profileGender && _profileGrade);
+        }
+
+        function submitProfile() {
+            const profile = {
+                name: document.getElementById('profileName').value.trim(),
+                age: parseInt(document.getElementById('profileAge').value),
+                gender: _profileGender,
+                grade: _profileGrade,
+            };
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            document.getElementById('welcomeOverlay').classList.remove('active');
+            showToast(`欢迎你，${profile.name}！🎉`, 'success');
+        }
+
+        // 页面加载时检查是否首次访问
+        document.addEventListener('DOMContentLoaded', function() {
+            const profile = getUserProfile();
+            if (!profile) {
+                document.getElementById('welcomeOverlay').classList.add('active');
+                // 监听名字输入
+                document.getElementById('profileName').addEventListener('input', checkProfileComplete);
+                document.getElementById('profileAge').addEventListener('input', checkProfileComplete);
+            }
+        });
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>
