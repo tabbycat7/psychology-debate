@@ -143,71 +143,6 @@
         flex-wrap: wrap;
     }
 
-    /* 润色认可度评价 */
-    .enhance-approval {
-        margin-top: 20px;
-        padding: 20px 24px;
-        border-radius: var(--radius-lg);
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.06), rgba(255, 152, 0, 0.06));
-        border: 2px solid rgba(255, 193, 7, 0.2);
-    }
-
-    .enhance-approval h5 {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: #e67e22;
-    }
-
-    .enhance-approval p {
-        font-size: 13px;
-        color: var(--text-secondary);
-        margin-bottom: 14px;
-    }
-
-    .approval-options {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .approval-opt {
-        flex: 1;
-        min-width: 140px;
-        max-width: 220px;
-        padding: 14px 18px;
-        border-radius: var(--radius-md);
-        border: 2px solid var(--border);
-        background: var(--bg-white);
-        cursor: pointer;
-        text-align: center;
-        font-size: 15px;
-        font-weight: 600;
-        transition: all 0.25s ease;
-    }
-
-    .approval-opt:hover {
-        border-color: var(--primary);
-        background: var(--primary-bg);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
-    }
-
-    .approval-opt.selected-yes {
-        border-color: #67c23a;
-        background: rgba(103, 194, 58, 0.08);
-        color: #67c23a;
-        box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
-    }
-
-    .approval-opt.selected-no {
-        border-color: #f56c6c;
-        background: rgba(245, 108, 108, 0.08);
-        color: #f56c6c;
-        box-shadow: 0 4px 12px rgba(245, 108, 108, 0.2);
-    }
-
     /* 轮次测评区 */
     .round-assessment {
         margin-top: 28px;
@@ -661,22 +596,7 @@
                     看看 AI 润色后的观点是否很好地支撑了你的想法。你可以直接编辑修改，或者让 AI 重新生成。
                 </p>
                 <textarea class="enhance-edit-textarea" id="enhanceEditTextarea"></textarea>
-
-                <!-- 润色认可度评价（先于按钮显示） -->
-                <div class="enhance-approval" id="enhanceApproval">
-                    <h5>🤔 AI 润色后的观点是否很好地支撑了你的想法？</h5>
-                    <p>请先做出评价，再决定下一步操作</p>
-                    <div class="approval-options">
-                        <div class="approval-opt" id="approvalYes" onclick="selectApproval(true)">
-                            👍 支撑得很好
-                        </div>
-                        <div class="approval-opt" id="approvalNo" onclick="selectApproval(false)">
-                            🤔 还不太满意
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enhance-review-actions" id="enhanceActions" style="display: none;">
+                <div class="enhance-review-actions">
                     <button class="btn btn-outline btn-lg" id="regenEnhanceBtn" onclick="regenerateEnhance()">
                         🔄 不满意，重新生成
                     </button>
@@ -811,7 +731,6 @@
         inspiredByAi: null,
         stanceChanged: null,
         quizSubmitted: false,
-        enhanceApproved: null,
     };
 
     // 显示用户档案信息
@@ -1055,17 +974,6 @@
         document.getElementById('enhanceReviewArea').style.display = 'block';
         document.getElementById('enhanceEditTextarea').value = enhancedText;
 
-        // 重置认可度评价
-        state.enhanceApproved = null;
-        const approvalArea = document.getElementById('enhanceApproval');
-        approvalArea.style.display = 'block';
-        document.getElementById('approvalYes').className = 'approval-opt';
-        document.getElementById('approvalNo').className = 'approval-opt';
-
-        // 隐藏按钮，等认可度评价完后再显示
-        document.getElementById('enhanceActions').style.display = 'none';
-
-        // 重置按钮状态
         const confirmBtn = document.getElementById('confirmEnhanceBtn');
         const regenBtn = document.getElementById('regenEnhanceBtn');
         confirmBtn.disabled = false;
@@ -1077,34 +985,6 @@
         setTimeout(() => {
             document.getElementById('enhanceReviewArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 200);
-    }
-
-    async function selectApproval(approved) {
-        state.enhanceApproved = approved;
-
-        // 高亮选中项
-        document.getElementById('approvalYes').className = approved ? 'approval-opt selected-yes' : 'approval-opt';
-        document.getElementById('approvalNo').className = !approved ? 'approval-opt selected-no' : 'approval-opt';
-
-        // 保存到后端
-        try {
-            const url = state.currentRound === 1
-                ? `/api/debate/enhance_approve/${state.sessionId}`
-                : `/api/debate/enhance_approve_round/${state.currentRoundId}`;
-            await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ approved }),
-            });
-        } catch (e) {
-            console.error('保存认可度失败', e);
-        }
-
-        // 显示操作按钮
-        const actions = document.getElementById('enhanceActions');
-        actions.style.display = 'flex';
-        setTimeout(() => {
-            actions.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
     }
 
     async function regenerateEnhance() {
@@ -1129,14 +1009,7 @@
             document.getElementById('battleContent').innerHTML =
                 rebuildCurrentRoundCards(state.currentUserArg, state.currentEnhancedArg, null, null);
 
-            // 重新生成后重置认可度评价
-            state.enhanceApproved = null;
-            document.getElementById('approvalYes').className = 'approval-opt';
-            document.getElementById('approvalNo').className = 'approval-opt';
-            document.getElementById('enhanceApproval').style.display = 'block';
-            document.getElementById('enhanceActions').style.display = 'none';
-
-            showToast('已重新生成润色内容，请重新评价', 'success');
+            showToast('已重新生成润色内容', 'success');
         } catch (error) {
             console.error(error);
         } finally {

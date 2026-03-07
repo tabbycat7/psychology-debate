@@ -143,71 +143,6 @@
         flex-wrap: wrap;
     }
 
-    /* 润色认可度评价 */
-    .enhance-approval {
-        margin-top: 20px;
-        padding: 20px 24px;
-        border-radius: var(--radius-lg);
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.06), rgba(255, 152, 0, 0.06));
-        border: 2px solid rgba(255, 193, 7, 0.2);
-    }
-
-    .enhance-approval h5 {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: #e67e22;
-    }
-
-    .enhance-approval p {
-        font-size: 13px;
-        color: var(--text-secondary);
-        margin-bottom: 14px;
-    }
-
-    .approval-options {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .approval-opt {
-        flex: 1;
-        min-width: 140px;
-        max-width: 220px;
-        padding: 14px 18px;
-        border-radius: var(--radius-md);
-        border: 2px solid var(--border);
-        background: var(--bg-white);
-        cursor: pointer;
-        text-align: center;
-        font-size: 15px;
-        font-weight: 600;
-        transition: all 0.25s ease;
-    }
-
-    .approval-opt:hover {
-        border-color: var(--primary);
-        background: var(--primary-bg);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
-    }
-
-    .approval-opt.selected-yes {
-        border-color: #67c23a;
-        background: rgba(103, 194, 58, 0.08);
-        color: #67c23a;
-        box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
-    }
-
-    .approval-opt.selected-no {
-        border-color: #f56c6c;
-        background: rgba(245, 108, 108, 0.08);
-        color: #f56c6c;
-        box-shadow: 0 4px 12px rgba(245, 108, 108, 0.2);
-    }
-
     /* 轮次测评区 */
     .round-assessment {
         margin-top: 28px;
@@ -441,83 +376,6 @@
         text-align: center;
         margin-top: 18px;
     }
-
-    /* 启发问题卡片 */
-    .inspired-section {
-        margin-top: 24px;
-        padding: 0;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        background: var(--bg-white);
-        border: 1px solid rgba(103, 194, 58, 0.2);
-        box-shadow: 0 4px 24px rgba(103, 194, 58, 0.06);
-    }
-
-    .inspired-section-header {
-        padding: 18px 24px;
-        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-        color: white;
-    }
-
-    .inspired-section-header h5 {
-        font-size: 16px;
-        font-weight: 700;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .inspired-section-body {
-        padding: 20px 24px 24px;
-    }
-
-    .inspired-options {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .inspired-option {
-        flex: 1;
-        min-width: 160px;
-        padding: 18px 14px;
-        border-radius: var(--radius-md);
-        border: 2px solid var(--border-color);
-        background: var(--bg-white);
-        cursor: pointer;
-        text-align: center;
-        font-size: 15px;
-        transition: all 0.25s ease;
-    }
-
-    .inspired-option .inspired-icon {
-        font-size: 28px;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .inspired-option:hover {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.04);
-    }
-
-    .inspired-option.selected-yes {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.08);
-        font-weight: 600;
-    }
-
-    .inspired-option.selected-no {
-        border-color: var(--text-secondary);
-        background: rgba(128, 128, 128, 0.06);
-        font-weight: 600;
-    }
-
-    .inspired-submit-area {
-        text-align: center;
-        margin-top: 18px;
-    }
 </style>
 {% endblock %}
 
@@ -661,22 +519,7 @@
                     看看 AI 润色后的观点是否很好地支撑了你的想法。你可以直接编辑修改，或者让 AI 重新生成。
                 </p>
                 <textarea class="enhance-edit-textarea" id="enhanceEditTextarea"></textarea>
-
-                <!-- 润色认可度评价（先于按钮显示） -->
-                <div class="enhance-approval" id="enhanceApproval">
-                    <h5>🤔 AI 润色后的观点是否很好地支撑了你的想法？</h5>
-                    <p>请先做出评价，再决定下一步操作</p>
-                    <div class="approval-options">
-                        <div class="approval-opt" id="approvalYes" onclick="selectApproval(true)">
-                            👍 支撑得很好
-                        </div>
-                        <div class="approval-opt" id="approvalNo" onclick="selectApproval(false)">
-                            🤔 还不太满意
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enhance-review-actions" id="enhanceActions" style="display: none;">
+                <div class="enhance-review-actions">
                     <button class="btn btn-outline btn-lg" id="regenEnhanceBtn" onclick="regenerateEnhance()">
                         🔄 不满意，重新生成
                     </button>
@@ -721,31 +564,7 @@
                 </div>
             </div>
 
-            <!-- 第二步：是否被 AI 启发（答题后显示） -->
-            <div id="inspiredSection" class="inspired-section" style="display: none;">
-                <div class="inspired-section-header">
-                    <h5>💡 AI 的反驳有没有给你带来新的启发？</h5>
-                </div>
-                <div class="inspired-section-body">
-                    <div class="inspired-options">
-                        <div class="inspired-option" id="inspiredYes" onclick="selectInspired(true)">
-                            <span class="inspired-icon">✨</span>
-                            有启发，学到新角度了
-                        </div>
-                        <div class="inspired-option" id="inspiredNo" onclick="selectInspired(false)">
-                            <span class="inspired-icon">🤷</span>
-                            没什么新的感觉
-                        </div>
-                    </div>
-                    <div class="inspired-submit-area" id="inspiredSubmitArea" style="display: none;">
-                        <button class="btn btn-primary btn-lg" id="submitInspiredBtn" onclick="submitInspired()">
-                            👉 下一步
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 第三步：立场变化（启发问题后显示） -->
+            <!-- 第二步：立场变化（答题后显示） -->
             <div id="stanceSection" class="stance-section" style="display: none;">
                 <div class="stance-section-header">
                     <h5>🤔 和 AI 辩了这一轮之后，你的想法变了吗？</h5>
@@ -808,10 +627,8 @@
         currentUserArg: '',
         currentEnhancedArg: '',
         quizAnswer: null,
-        inspiredByAi: null,
         stanceChanged: null,
         quizSubmitted: false,
-        enhanceApproved: null,
     };
 
     // 显示用户档案信息
@@ -924,8 +741,6 @@
         const historyClass = isHistory ? 'history-round' : '';
         let html = '';
 
-        html += `<div class="round-wrapper ${historyClass}" id="round${roundNum}Wrapper" data-round="${roundNum}">`;
-
         if (roundNum > 1) {
             html += `
             <div class="round-divider">
@@ -933,7 +748,7 @@
             </div>`;
         }
 
-        html += `<div id="round${roundNum}Content">`;
+        html += `<div class="${historyClass}" id="round${roundNum}Content">`;
 
         html += `
         <div class="result-section">
@@ -979,7 +794,7 @@
             </div>`;
         }
 
-        html += '</div></div>';
+        html += '</div>';
         return html;
     }
 
@@ -1054,57 +869,10 @@
     function showEnhanceReview(enhancedText) {
         document.getElementById('enhanceReviewArea').style.display = 'block';
         document.getElementById('enhanceEditTextarea').value = enhancedText;
-
-        // 重置认可度评价
-        state.enhanceApproved = null;
-        const approvalArea = document.getElementById('enhanceApproval');
-        approvalArea.style.display = 'block';
-        document.getElementById('approvalYes').className = 'approval-opt';
-        document.getElementById('approvalNo').className = 'approval-opt';
-
-        // 隐藏按钮，等认可度评价完后再显示
-        document.getElementById('enhanceActions').style.display = 'none';
-
-        // 重置按钮状态
-        const confirmBtn = document.getElementById('confirmEnhanceBtn');
-        const regenBtn = document.getElementById('regenEnhanceBtn');
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '👍 确认，开始反驳！';
-        regenBtn.disabled = false;
-        regenBtn.innerHTML = '🔄 不满意，重新生成';
-
         state.battleDone = true;
         setTimeout(() => {
             document.getElementById('enhanceReviewArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 200);
-    }
-
-    async function selectApproval(approved) {
-        state.enhanceApproved = approved;
-
-        // 高亮选中项
-        document.getElementById('approvalYes').className = approved ? 'approval-opt selected-yes' : 'approval-opt';
-        document.getElementById('approvalNo').className = !approved ? 'approval-opt selected-no' : 'approval-opt';
-
-        // 保存到后端
-        try {
-            const url = state.currentRound === 1
-                ? `/api/debate/enhance_approve/${state.sessionId}`
-                : `/api/debate/enhance_approve_round/${state.currentRoundId}`;
-            await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ approved }),
-            });
-        } catch (e) {
-            console.error('保存认可度失败', e);
-        }
-
-        // 显示操作按钮
-        const actions = document.getElementById('enhanceActions');
-        actions.style.display = 'flex';
-        setTimeout(() => {
-            actions.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
     }
 
     async function regenerateEnhance() {
@@ -1129,14 +897,7 @@
             document.getElementById('battleContent').innerHTML =
                 rebuildCurrentRoundCards(state.currentUserArg, state.currentEnhancedArg, null, null);
 
-            // 重新生成后重置认可度评价
-            state.enhanceApproved = null;
-            document.getElementById('approvalYes').className = 'approval-opt';
-            document.getElementById('approvalNo').className = 'approval-opt';
-            document.getElementById('enhanceApproval').style.display = 'block';
-            document.getElementById('enhanceActions').style.display = 'none';
-
-            showToast('已重新生成润色内容，请重新评价', 'success');
+            showToast('已重新生成润色内容', 'success');
         } catch (error) {
             console.error(error);
         } finally {
@@ -1211,12 +972,19 @@
     }
 
     function rebuildCurrentRoundCards(userArg, enhancedArg, refutation, modelName) {
-        let historyHTML = '';
-        document.querySelectorAll('#battleContent .round-wrapper.history-round').forEach(el => {
-            historyHTML += el.outerHTML;
+        let allHTML = '';
+        // 保留历史轮次
+        document.querySelectorAll('#battleContent .history-round, #battleContent .round-divider').forEach(el => {
+            allHTML += el.outerHTML;
         });
-        const currentHTML = buildRoundHTML(state.currentRound, userArg, enhancedArg, refutation, modelName, false);
-        return historyHTML + currentHTML;
+        // 追加当前轮次
+        let currentHTML = buildRoundHTML(state.currentRound, userArg, enhancedArg, refutation, modelName, false);
+        if (state.currentRound > 1) {
+            // buildRoundHTML 已包含 round-divider，但历史中也可能有，需去重
+            // 简单做法：如果 allHTML 末尾已有该轮的分隔线则不重复
+        }
+        allHTML += currentHTML;
+        return allHTML;
     }
 
     // ============================================================
@@ -1237,7 +1005,7 @@
         btn.innerHTML = '⏳ 提交中...';
         document.getElementById('endDebateBtn').disabled = true;
 
-        document.querySelectorAll('#battleContent .round-wrapper').forEach(el => {
+        document.querySelectorAll('#battleContent > div:not(.round-divider)').forEach(el => {
             el.classList.add('history-round');
         });
 
@@ -1260,7 +1028,7 @@
             document.getElementById('battleContent').innerHTML += buildRoundHTML(state.currentRound, continueArg, null, null, null, false);
 
             setTimeout(() => {
-                const el = document.getElementById(`round${state.currentRound}Wrapper`);
+                const el = document.getElementById(`round${state.currentRound}Content`);
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
 
@@ -1299,51 +1067,21 @@
     // 轮次测评：第一步选择题 → 第二步立场变化
     // ============================================================
     async function startAssessment() {
-        // 重置所有测评相关状态
         state.quizAnswer = null;
-        state.inspiredByAi = null;
         state.stanceChanged = null;
         state.quizSubmitted = false;
 
-        // 重置测评区可见性
         document.getElementById('assessmentArea').style.display = 'block';
         document.getElementById('quizLoading').style.display = 'block';
         document.getElementById('quizContent').style.display = 'none';
         document.getElementById('quizSubmitArea').style.display = 'none';
         document.getElementById('quizResult').style.display = 'none';
-        document.getElementById('inspiredSection').style.display = 'none';
         document.getElementById('stanceSection').style.display = 'none';
         document.getElementById('roundCompleteArea').style.display = 'none';
 
-        // 重置选择题提交按钮
-        const quizBtn = document.getElementById('submitQuizBtn');
-        quizBtn.disabled = false;
-        quizBtn.innerHTML = '📩 提交答案';
-
-        // 重置启发选择
-        document.getElementById('inspiredYes').className = 'inspired-option';
-        document.getElementById('inspiredNo').className = 'inspired-option';
-        document.getElementById('inspiredSubmitArea').style.display = 'none';
-        const inspiredBtn = document.getElementById('submitInspiredBtn');
-        inspiredBtn.disabled = false;
-        inspiredBtn.innerHTML = '👉 下一步';
-
-        // 重置立场选择按钮
         document.getElementById('stanceChanged').className = 'stance-option';
         document.getElementById('stanceUnchanged').className = 'stance-option';
         document.getElementById('stanceSubmitArea').style.display = 'none';
-        const stanceBtn = document.getElementById('submitStanceBtn');
-        stanceBtn.disabled = false;
-        stanceBtn.innerHTML = '✅ 确认，继续辩论';
-
-        // 重置继续辩论区按钮
-        document.getElementById('continueArgument').value = '';
-        const continueBtn = document.getElementById('continueBtn');
-        continueBtn.disabled = true;
-        continueBtn.innerHTML = '🔥 继续辩论！';
-        const endBtn = document.getElementById('endDebateBtn');
-        endBtn.disabled = false;
-        endBtn.innerHTML = '🏁 结束辩论';
 
         setTimeout(() => {
             document.getElementById('assessmentArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1431,55 +1169,16 @@
                 }
             });
 
-            // 延迟后弹出启发问题
+            // 延迟后弹出立场变化问题
             setTimeout(() => {
-                document.getElementById('inspiredSection').style.display = 'block';
-                document.getElementById('inspiredSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.getElementById('stanceSection').style.display = 'block';
+                document.getElementById('stanceSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 600);
 
         } catch (error) {
             btn.disabled = false;
             btn.innerHTML = '📩 提交答案';
             state.quizSubmitted = false;
-            console.error(error);
-        }
-    }
-
-    function selectInspired(yes) {
-        state.inspiredByAi = yes;
-        document.getElementById('inspiredYes').className = 'inspired-option' + (yes === true ? ' selected-yes' : '');
-        document.getElementById('inspiredNo').className = 'inspired-option' + (yes === false ? ' selected-no' : '');
-        document.getElementById('inspiredSubmitArea').style.display = 'block';
-    }
-
-    async function submitInspired() {
-        if (state.inspiredByAi === null) return;
-
-        const btn = document.getElementById('submitInspiredBtn');
-        btn.disabled = true;
-        btn.innerHTML = '⏳ 提交中...';
-
-        try {
-            const answerUrl = state.currentRound === 1
-                ? `/api/debate/answer/${state.sessionId}`
-                : `/api/debate/answer_round/${state.currentRoundId}`;
-
-            await apiFetch(answerUrl, {
-                method: 'POST',
-                body: JSON.stringify({ inspired_by_ai: state.inspiredByAi }),
-            });
-
-            btn.innerHTML = '✅ 已提交';
-
-            // 延迟后显示立场变化问题
-            setTimeout(() => {
-                document.getElementById('stanceSection').style.display = 'block';
-                document.getElementById('stanceSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 400);
-
-        } catch (error) {
-            btn.disabled = false;
-            btn.innerHTML = '👉 下一步';
             console.error(error);
         }
     }

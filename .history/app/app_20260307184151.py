@@ -320,26 +320,6 @@ def update_enhanced_round(round_id):
     return jsonify({"success": True, "enhanced_argument": edited})
 
 
-@app.route('/api/debate/enhance_approve/<session_id>', methods=['POST'])
-def enhance_approve(session_id):
-    """记录学生对润色观点的认可度"""
-    session = DebateSession.query.get_or_404(session_id)
-    data = request.json
-    session.enhance_approved = bool(data.get('approved'))
-    db.session.commit()
-    return jsonify({"success": True})
-
-
-@app.route('/api/debate/enhance_approve_round/<round_id>', methods=['POST'])
-def enhance_approve_round(round_id):
-    """记录某一轮学生对润色观点的认可度"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    data = request.json
-    debate_round.enhance_approved = bool(data.get('approved'))
-    db.session.commit()
-    return jsonify({"success": True})
-
-
 @app.route('/api/debate/refute/<session_id>', methods=['POST'])
 def refute(session_id):
     """

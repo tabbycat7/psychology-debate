@@ -42,6 +42,8 @@ class DebateSession(db.Model):
 
     # 加持模型润色后的观点（第一轮）
     enhanced_argument = db.Column(db.Text, nullable=True)
+    enhance_regenerate_count = db.Column(db.Integer, default=0)
+    enhance_approved = db.Column(db.Boolean, nullable=True)
 
     # 反驳模型的反驳内容（第一轮）
     refutation = db.Column(db.Text, nullable=True)
@@ -51,27 +53,14 @@ class DebateSession(db.Model):
     # 辩论轮数
     total_rounds = db.Column(db.Integer, default=1)
 
-    # ============================================================
-    # 学生测评字段（1-5 分）
-    # ============================================================
-    # 能理解：AI 说的话你能听懂吗？
-    eval_understandable = db.Column(db.Integer, nullable=True)
-    # 被看见：AI 有没有认真对待你的想法？
-    eval_seen = db.Column(db.Integer, nullable=True)
-    # 懂教育：AI 有没有激发你的思考？
-    eval_educational = db.Column(db.Integer, nullable=True)
-    # 学生对 AI 的自由评价
-    eval_comment = db.Column(db.Text, nullable=True)
-
-    # ============================================================
-    # 人工标注字段
-    # ============================================================
-    # 用户立场是否改变: None=未标注, True=改变, False=未改变
-    stance_changed = db.Column(db.Boolean, nullable=True, default=None)
-    # 标注备注
-    annotation_note = db.Column(db.Text, nullable=True)
-    # 标注时间
-    annotated_at = db.Column(db.DateTime, nullable=True)
+    # 每轮测评（第1轮）
+    quiz_question = db.Column(db.Text, nullable=True)
+    quiz_options = db.Column(db.Text, nullable=True)       # JSON: ["A. ...", "B. ...", ...]
+    quiz_correct_answer = db.Column(db.String(10), nullable=True)  # "A" / "B" / "C" / "D"
+    quiz_student_answer = db.Column(db.String(10), nullable=True)
+    quiz_is_correct = db.Column(db.Boolean, nullable=True)
+    inspired_by_ai = db.Column(db.Boolean, nullable=True)
+    stance_changed = db.Column(db.Boolean, nullable=True)
 
     # 时间戳
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -93,16 +82,18 @@ class DebateSession(db.Model):
             "chosen_side_text": self.chosen_side_text,
             "user_argument": self.user_argument,
             "enhanced_argument": self.enhanced_argument,
+            "enhance_regenerate_count": self.enhance_regenerate_count,
+            "enhance_approved": self.enhance_approved,
             "refutation": self.refutation,
             "refute_model_name": self.refute_model_name,
             "total_rounds": self.total_rounds,
-            "eval_understandable": self.eval_understandable,
-            "eval_seen": self.eval_seen,
-            "eval_educational": self.eval_educational,
-            "eval_comment": self.eval_comment,
+            "quiz_question": self.quiz_question,
+            "quiz_options": self.quiz_options,
+            "quiz_correct_answer": self.quiz_correct_answer,
+            "quiz_student_answer": self.quiz_student_answer,
+            "quiz_is_correct": self.quiz_is_correct,
+            "inspired_by_ai": self.inspired_by_ai,
             "stance_changed": self.stance_changed,
-            "annotation_note": self.annotation_note,
-            "annotated_at": self.annotated_at.isoformat() if self.annotated_at else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "rounds": [r.to_dict() for r in self.rounds],
         }
@@ -120,9 +111,20 @@ class DebateRound(db.Model):
     user_argument = db.Column(db.Text, nullable=False)
     # 加持后的观点
     enhanced_argument = db.Column(db.Text, nullable=True)
+    enhance_regenerate_count = db.Column(db.Integer, default=0)
+    enhance_approved = db.Column(db.Boolean, nullable=True)
     # AI 的反驳
     refutation = db.Column(db.Text, nullable=True)
     refute_model_name = db.Column(db.String(100), nullable=True)
+
+    # 每轮测评
+    quiz_question = db.Column(db.Text, nullable=True)
+    quiz_options = db.Column(db.Text, nullable=True)
+    quiz_correct_answer = db.Column(db.String(10), nullable=True)
+    quiz_student_answer = db.Column(db.String(10), nullable=True)
+    quiz_is_correct = db.Column(db.Boolean, nullable=True)
+    inspired_by_ai = db.Column(db.Boolean, nullable=True)
+    stance_changed = db.Column(db.Boolean, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -132,7 +134,16 @@ class DebateRound(db.Model):
             "round_number": self.round_number,
             "user_argument": self.user_argument,
             "enhanced_argument": self.enhanced_argument,
+            "enhance_regenerate_count": self.enhance_regenerate_count,
+            "enhance_approved": self.enhance_approved,
             "refutation": self.refutation,
             "refute_model_name": self.refute_model_name,
+            "quiz_question": self.quiz_question,
+            "quiz_options": self.quiz_options,
+            "quiz_correct_answer": self.quiz_correct_answer,
+            "quiz_student_answer": self.quiz_student_answer,
+            "quiz_is_correct": self.quiz_is_correct,
+            "inspired_by_ai": self.inspired_by_ai,
+            "stance_changed": self.stance_changed,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

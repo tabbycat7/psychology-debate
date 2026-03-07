@@ -143,256 +143,105 @@
         flex-wrap: wrap;
     }
 
-    /* 润色认可度评价 */
-    .enhance-approval {
-        margin-top: 20px;
-        padding: 20px 24px;
-        border-radius: var(--radius-lg);
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.06), rgba(255, 152, 0, 0.06));
-        border: 2px solid rgba(255, 193, 7, 0.2);
-    }
-
-    .enhance-approval h5 {
-        font-size: 16px;
-        font-weight: 700;
-        margin-bottom: 6px;
-        color: #e67e22;
-    }
-
-    .enhance-approval p {
-        font-size: 13px;
-        color: var(--text-secondary);
-        margin-bottom: 14px;
-    }
-
-    .approval-options {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .approval-opt {
-        flex: 1;
-        min-width: 140px;
-        max-width: 220px;
-        padding: 14px 18px;
-        border-radius: var(--radius-md);
-        border: 2px solid var(--border);
-        background: var(--bg-white);
-        cursor: pointer;
-        text-align: center;
-        font-size: 15px;
-        font-weight: 600;
-        transition: all 0.25s ease;
-    }
-
-    .approval-opt:hover {
-        border-color: var(--primary);
-        background: var(--primary-bg);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(64, 158, 255, 0.15);
-    }
-
-    .approval-opt.selected-yes {
-        border-color: #67c23a;
-        background: rgba(103, 194, 58, 0.08);
-        color: #67c23a;
-        box-shadow: 0 4px 12px rgba(103, 194, 58, 0.2);
-    }
-
-    .approval-opt.selected-no {
-        border-color: #f56c6c;
-        background: rgba(245, 108, 108, 0.08);
-        color: #f56c6c;
-        box-shadow: 0 4px 12px rgba(245, 108, 108, 0.2);
-    }
-
     /* 轮次测评区 */
     .round-assessment {
         margin-top: 28px;
-        padding: 0;
+        padding: 28px;
         border-radius: var(--radius-lg);
-        overflow: hidden;
-        background: var(--bg-white);
-        border: 1px solid rgba(99, 102, 241, 0.18);
-        box-shadow: 0 4px 24px rgba(99, 102, 241, 0.08);
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(64, 158, 255, 0.05) 100%);
+        border: 1px solid rgba(99, 102, 241, 0.15);
     }
 
-    .assessment-header {
-        padding: 20px 28px;
-        background: linear-gradient(135deg, #6366f1 0%, #4f8cff 100%);
-        color: white;
-    }
-
-    .assessment-header h4 {
+    .round-assessment h4 {
         font-size: 18px;
         font-weight: 700;
-        margin: 0;
+        margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 8px;
     }
 
-    .assessment-header p {
-        margin: 6px 0 0;
-        font-size: 13px;
-        opacity: 0.85;
-    }
-
-    .assessment-body {
-        padding: 24px 28px 28px;
-    }
-
-    /* 选择题题干 */
     .quiz-question {
         font-size: 16px;
         font-weight: 600;
-        line-height: 1.7;
-        margin-bottom: 18px;
+        line-height: 1.6;
+        margin-bottom: 16px;
         color: var(--text-primary);
-        padding: 16px 20px;
-        background: rgba(99, 102, 241, 0.04);
-        border-radius: var(--radius-md);
-        border-left: 4px solid #6366f1;
     }
 
     .quiz-options {
         display: flex;
         flex-direction: column;
         gap: 10px;
-        margin-bottom: 0;
+        margin-bottom: 20px;
     }
 
     .quiz-option {
-        padding: 14px 18px 14px 48px;
+        padding: 14px 18px;
         border-radius: var(--radius-md);
         border: 2px solid var(--border-color);
         background: var(--bg-white);
         cursor: pointer;
         font-size: 15px;
         line-height: 1.5;
-        transition: all 0.25s ease;
-        position: relative;
-    }
-
-    .quiz-option::before {
-        content: attr(data-letter);
-        position: absolute;
-        left: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: rgba(99, 102, 241, 0.08);
-        color: #6366f1;
-        font-weight: 700;
-        font-size: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.25s ease;
+        transition: all 0.2s ease;
     }
 
     .quiz-option:hover {
-        border-color: #6366f1;
-        background: rgba(99, 102, 241, 0.03);
-        transform: translateX(4px);
+        border-color: var(--primary);
+        background: rgba(64, 158, 255, 0.04);
     }
 
     .quiz-option.selected {
-        border-color: #6366f1;
-        background: rgba(99, 102, 241, 0.06);
+        border-color: var(--primary);
+        background: rgba(64, 158, 255, 0.08);
         font-weight: 600;
-    }
-
-    .quiz-option.selected::before {
-        background: #6366f1;
-        color: white;
     }
 
     .quiz-option.correct {
         border-color: var(--success);
-        background: rgba(103, 194, 58, 0.08);
-    }
-
-    .quiz-option.correct::before {
-        background: var(--success);
-        color: white;
-        content: '✓';
+        background: rgba(103, 194, 58, 0.1);
     }
 
     .quiz-option.wrong {
         border-color: var(--danger);
-        background: rgba(245, 108, 108, 0.08);
-    }
-
-    .quiz-option.wrong::before {
-        background: var(--danger);
-        color: white;
-        content: '✗';
+        background: rgba(245, 108, 108, 0.1);
     }
 
     .quiz-option.disabled {
         pointer-events: none;
-        opacity: 0.75;
+        opacity: 0.7;
     }
 
     .quiz-result {
-        padding: 16px 20px;
+        padding: 14px 18px;
         border-radius: var(--radius-md);
         font-size: 15px;
         font-weight: 600;
         text-align: center;
-        margin-top: 16px;
+        margin-bottom: 20px;
     }
 
     .quiz-result.correct {
-        background: rgba(103, 194, 58, 0.1);
+        background: rgba(103, 194, 58, 0.12);
         color: var(--success);
-        border: 1px solid rgba(103, 194, 58, 0.2);
     }
 
     .quiz-result.wrong {
-        background: rgba(245, 108, 108, 0.1);
+        background: rgba(245, 108, 108, 0.12);
         color: var(--danger);
-        border: 1px solid rgba(245, 108, 108, 0.2);
     }
 
-    .quiz-submit-area {
-        text-align: center;
-        margin-top: 20px;
-    }
-
-    /* 立场变化卡片 —— 独立区域 */
-    .stance-section {
+    .stance-question {
         margin-top: 24px;
-        padding: 0;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        background: var(--bg-white);
-        border: 1px solid rgba(230, 162, 60, 0.2);
-        box-shadow: 0 4px 24px rgba(230, 162, 60, 0.06);
+        padding-top: 20px;
+        border-top: 1px solid var(--border-color);
     }
 
-    .stance-section-header {
-        padding: 18px 24px;
-        background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-        color: white;
-    }
-
-    .stance-section-header h5 {
+    .stance-question h5 {
         font-size: 16px;
-        font-weight: 700;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .stance-section-body {
-        padding: 20px 24px 24px;
+        font-weight: 600;
+        margin-bottom: 12px;
     }
 
     .stance-options {
@@ -404,119 +253,24 @@
     .stance-option {
         flex: 1;
         min-width: 160px;
-        padding: 18px 14px;
+        padding: 14px;
         border-radius: var(--radius-md);
         border: 2px solid var(--border-color);
         background: var(--bg-white);
         cursor: pointer;
         text-align: center;
         font-size: 15px;
-        transition: all 0.25s ease;
-    }
-
-    .stance-option .stance-icon {
-        font-size: 28px;
-        display: block;
-        margin-bottom: 8px;
+        transition: all 0.2s ease;
     }
 
     .stance-option:hover {
-        border-color: #f59e0b;
-        background: rgba(245, 158, 11, 0.04);
+        border-color: var(--primary);
     }
 
-    .stance-option.selected-changed {
-        border-color: #f59e0b;
-        background: rgba(245, 158, 11, 0.08);
+    .stance-option.selected {
+        border-color: var(--primary);
+        background: rgba(64, 158, 255, 0.08);
         font-weight: 600;
-    }
-
-    .stance-option.selected-unchanged {
-        border-color: var(--success);
-        background: rgba(103, 194, 58, 0.08);
-        font-weight: 600;
-    }
-
-    .stance-submit-area {
-        text-align: center;
-        margin-top: 18px;
-    }
-
-    /* 启发问题卡片 */
-    .inspired-section {
-        margin-top: 24px;
-        padding: 0;
-        border-radius: var(--radius-lg);
-        overflow: hidden;
-        background: var(--bg-white);
-        border: 1px solid rgba(103, 194, 58, 0.2);
-        box-shadow: 0 4px 24px rgba(103, 194, 58, 0.06);
-    }
-
-    .inspired-section-header {
-        padding: 18px 24px;
-        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-        color: white;
-    }
-
-    .inspired-section-header h5 {
-        font-size: 16px;
-        font-weight: 700;
-        margin: 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .inspired-section-body {
-        padding: 20px 24px 24px;
-    }
-
-    .inspired-options {
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
-
-    .inspired-option {
-        flex: 1;
-        min-width: 160px;
-        padding: 18px 14px;
-        border-radius: var(--radius-md);
-        border: 2px solid var(--border-color);
-        background: var(--bg-white);
-        cursor: pointer;
-        text-align: center;
-        font-size: 15px;
-        transition: all 0.25s ease;
-    }
-
-    .inspired-option .inspired-icon {
-        font-size: 28px;
-        display: block;
-        margin-bottom: 8px;
-    }
-
-    .inspired-option:hover {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.04);
-    }
-
-    .inspired-option.selected-yes {
-        border-color: #10b981;
-        background: rgba(16, 185, 129, 0.08);
-        font-weight: 600;
-    }
-
-    .inspired-option.selected-no {
-        border-color: var(--text-secondary);
-        background: rgba(128, 128, 128, 0.06);
-        font-weight: 600;
-    }
-
-    .inspired-submit-area {
-        text-align: center;
-        margin-top: 18px;
     }
 </style>
 {% endblock %}
@@ -661,22 +415,7 @@
                     看看 AI 润色后的观点是否很好地支撑了你的想法。你可以直接编辑修改，或者让 AI 重新生成。
                 </p>
                 <textarea class="enhance-edit-textarea" id="enhanceEditTextarea"></textarea>
-
-                <!-- 润色认可度评价（先于按钮显示） -->
-                <div class="enhance-approval" id="enhanceApproval">
-                    <h5>🤔 AI 润色后的观点是否很好地支撑了你的想法？</h5>
-                    <p>请先做出评价，再决定下一步操作</p>
-                    <div class="approval-options">
-                        <div class="approval-opt" id="approvalYes" onclick="selectApproval(true)">
-                            👍 支撑得很好
-                        </div>
-                        <div class="approval-opt" id="approvalNo" onclick="selectApproval(false)">
-                            🤔 还不太满意
-                        </div>
-                    </div>
-                </div>
-
-                <div class="enhance-review-actions" id="enhanceActions" style="display: none;">
+                <div class="enhance-review-actions">
                     <button class="btn btn-outline btn-lg" id="regenEnhanceBtn" onclick="regenerateEnhance()">
                         🔄 不满意，重新生成
                     </button>
@@ -687,85 +426,47 @@
             </div>
         </div>
 
-        <!-- 轮次测评区（反驳完成后：第一步选择题 → 第二步立场询问） -->
+        <!-- 轮次测评区（反驳完成后出题 + 立场询问） -->
         <div id="assessmentArea" style="display: none;">
-            <!-- 第一步：选择题 -->
             <div class="round-assessment">
-                <div class="assessment-header">
-                    <h4>📝 理解力小测</h4>
-                    <p>读完 AI 的反驳，来看看你是否理解了它的核心意思</p>
-                </div>
+                <h4>📝 本轮小测</h4>
 
-                <div class="assessment-body">
-                    <!-- 选择题加载中 -->
-                    <div id="quizLoading" class="text-center" style="padding: 20px;">
-                        <div class="loading-spinner">
-                            <div class="spinner"></div>
-                            <span>正在出题中...</span>
-                        </div>
-                    </div>
-
-                    <!-- 选择题内容 -->
-                    <div id="quizContent" style="display: none;">
-                        <div class="quiz-question" id="quizQuestion"></div>
-                        <div class="quiz-options" id="quizOptions"></div>
-
-                        <div class="quiz-submit-area" id="quizSubmitArea" style="display: none;">
-                            <button class="btn btn-primary btn-lg" id="submitQuizBtn" onclick="submitQuiz()">
-                                📩 提交答案
-                            </button>
-                        </div>
-
-                        <div id="quizResult" style="display: none;"></div>
+                <!-- 选择题加载中 -->
+                <div id="quizLoading" class="text-center" style="padding: 20px;">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <span>正在出题中...</span>
                     </div>
                 </div>
-            </div>
 
-            <!-- 第二步：是否被 AI 启发（答题后显示） -->
-            <div id="inspiredSection" class="inspired-section" style="display: none;">
-                <div class="inspired-section-header">
-                    <h5>💡 AI 的反驳有没有给你带来新的启发？</h5>
+                <!-- 选择题内容 -->
+                <div id="quizContent" style="display: none;">
+                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 12px;">
+                        读完 AI 的反驳，来看看你是否理解了它的意思：
+                    </p>
+                    <div class="quiz-question" id="quizQuestion"></div>
+                    <div class="quiz-options" id="quizOptions"></div>
+                    <div id="quizResult" style="display: none;"></div>
                 </div>
-                <div class="inspired-section-body">
-                    <div class="inspired-options">
-                        <div class="inspired-option" id="inspiredYes" onclick="selectInspired(true)">
-                            <span class="inspired-icon">✨</span>
-                            有启发，学到新角度了
-                        </div>
-                        <div class="inspired-option" id="inspiredNo" onclick="selectInspired(false)">
-                            <span class="inspired-icon">🤷</span>
-                            没什么新的感觉
-                        </div>
-                    </div>
-                    <div class="inspired-submit-area" id="inspiredSubmitArea" style="display: none;">
-                        <button class="btn btn-primary btn-lg" id="submitInspiredBtn" onclick="submitInspired()">
-                            👉 下一步
-                        </button>
-                    </div>
-                </div>
-            </div>
 
-            <!-- 第三步：立场变化（启发问题后显示） -->
-            <div id="stanceSection" class="stance-section" style="display: none;">
-                <div class="stance-section-header">
+                <!-- 观点是否改变 -->
+                <div class="stance-question" id="stanceSection" style="display: none;">
                     <h5>🤔 和 AI 辩了这一轮之后，你的想法变了吗？</h5>
-                </div>
-                <div class="stance-section-body">
                     <div class="stance-options">
                         <div class="stance-option" id="stanceChanged" onclick="selectStanceChange(true)">
-                            <span class="stance-icon">🔄</span>
-                            想法有变化
+                            🔄 想法有变化
                         </div>
                         <div class="stance-option" id="stanceUnchanged" onclick="selectStanceChange(false)">
-                            <span class="stance-icon">💪</span>
-                            我还是坚持！
+                            💪 我还是坚持！
                         </div>
                     </div>
-                    <div class="stance-submit-area" id="stanceSubmitArea" style="display: none;">
-                        <button class="btn btn-primary btn-lg" id="submitStanceBtn" onclick="submitStance()">
-                            ✅ 确认，继续辩论
-                        </button>
-                    </div>
+                </div>
+
+                <!-- 提交测评按钮 -->
+                <div class="text-center mt-6" id="assessmentSubmitArea" style="display: none;">
+                    <button class="btn btn-primary btn-lg" id="submitAssessmentBtn" onclick="submitAssessment()">
+                        ✅ 提交，继续
+                    </button>
                 </div>
             </div>
         </div>
@@ -808,10 +509,8 @@
         currentUserArg: '',
         currentEnhancedArg: '',
         quizAnswer: null,
-        inspiredByAi: null,
         stanceChanged: null,
         quizSubmitted: false,
-        enhanceApproved: null,
     };
 
     // 显示用户档案信息
@@ -924,8 +623,6 @@
         const historyClass = isHistory ? 'history-round' : '';
         let html = '';
 
-        html += `<div class="round-wrapper ${historyClass}" id="round${roundNum}Wrapper" data-round="${roundNum}">`;
-
         if (roundNum > 1) {
             html += `
             <div class="round-divider">
@@ -933,7 +630,7 @@
             </div>`;
         }
 
-        html += `<div id="round${roundNum}Content">`;
+        html += `<div class="${historyClass}" id="round${roundNum}Content">`;
 
         html += `
         <div class="result-section">
@@ -979,7 +676,7 @@
             </div>`;
         }
 
-        html += '</div></div>';
+        html += '</div>';
         return html;
     }
 
@@ -1054,57 +751,10 @@
     function showEnhanceReview(enhancedText) {
         document.getElementById('enhanceReviewArea').style.display = 'block';
         document.getElementById('enhanceEditTextarea').value = enhancedText;
-
-        // 重置认可度评价
-        state.enhanceApproved = null;
-        const approvalArea = document.getElementById('enhanceApproval');
-        approvalArea.style.display = 'block';
-        document.getElementById('approvalYes').className = 'approval-opt';
-        document.getElementById('approvalNo').className = 'approval-opt';
-
-        // 隐藏按钮，等认可度评价完后再显示
-        document.getElementById('enhanceActions').style.display = 'none';
-
-        // 重置按钮状态
-        const confirmBtn = document.getElementById('confirmEnhanceBtn');
-        const regenBtn = document.getElementById('regenEnhanceBtn');
-        confirmBtn.disabled = false;
-        confirmBtn.innerHTML = '👍 确认，开始反驳！';
-        regenBtn.disabled = false;
-        regenBtn.innerHTML = '🔄 不满意，重新生成';
-
         state.battleDone = true;
         setTimeout(() => {
             document.getElementById('enhanceReviewArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 200);
-    }
-
-    async function selectApproval(approved) {
-        state.enhanceApproved = approved;
-
-        // 高亮选中项
-        document.getElementById('approvalYes').className = approved ? 'approval-opt selected-yes' : 'approval-opt';
-        document.getElementById('approvalNo').className = !approved ? 'approval-opt selected-no' : 'approval-opt';
-
-        // 保存到后端
-        try {
-            const url = state.currentRound === 1
-                ? `/api/debate/enhance_approve/${state.sessionId}`
-                : `/api/debate/enhance_approve_round/${state.currentRoundId}`;
-            await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify({ approved }),
-            });
-        } catch (e) {
-            console.error('保存认可度失败', e);
-        }
-
-        // 显示操作按钮
-        const actions = document.getElementById('enhanceActions');
-        actions.style.display = 'flex';
-        setTimeout(() => {
-            actions.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
     }
 
     async function regenerateEnhance() {
@@ -1129,14 +779,7 @@
             document.getElementById('battleContent').innerHTML =
                 rebuildCurrentRoundCards(state.currentUserArg, state.currentEnhancedArg, null, null);
 
-            // 重新生成后重置认可度评价
-            state.enhanceApproved = null;
-            document.getElementById('approvalYes').className = 'approval-opt';
-            document.getElementById('approvalNo').className = 'approval-opt';
-            document.getElementById('enhanceApproval').style.display = 'block';
-            document.getElementById('enhanceActions').style.display = 'none';
-
-            showToast('已重新生成润色内容，请重新评价', 'success');
+            showToast('已重新生成润色内容', 'success');
         } catch (error) {
             console.error(error);
         } finally {
@@ -1211,12 +854,19 @@
     }
 
     function rebuildCurrentRoundCards(userArg, enhancedArg, refutation, modelName) {
-        let historyHTML = '';
-        document.querySelectorAll('#battleContent .round-wrapper.history-round').forEach(el => {
-            historyHTML += el.outerHTML;
+        let allHTML = '';
+        // 保留历史轮次
+        document.querySelectorAll('#battleContent .history-round, #battleContent .round-divider').forEach(el => {
+            allHTML += el.outerHTML;
         });
-        const currentHTML = buildRoundHTML(state.currentRound, userArg, enhancedArg, refutation, modelName, false);
-        return historyHTML + currentHTML;
+        // 追加当前轮次
+        let currentHTML = buildRoundHTML(state.currentRound, userArg, enhancedArg, refutation, modelName, false);
+        if (state.currentRound > 1) {
+            // buildRoundHTML 已包含 round-divider，但历史中也可能有，需去重
+            // 简单做法：如果 allHTML 末尾已有该轮的分隔线则不重复
+        }
+        allHTML += currentHTML;
+        return allHTML;
     }
 
     // ============================================================
@@ -1237,7 +887,7 @@
         btn.innerHTML = '⏳ 提交中...';
         document.getElementById('endDebateBtn').disabled = true;
 
-        document.querySelectorAll('#battleContent .round-wrapper').forEach(el => {
+        document.querySelectorAll('#battleContent > div:not(.round-divider)').forEach(el => {
             el.classList.add('history-round');
         });
 
@@ -1260,7 +910,7 @@
             document.getElementById('battleContent').innerHTML += buildRoundHTML(state.currentRound, continueArg, null, null, null, false);
 
             setTimeout(() => {
-                const el = document.getElementById(`round${state.currentRound}Wrapper`);
+                const el = document.getElementById(`round${state.currentRound}Content`);
                 if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }, 100);
 
@@ -1296,66 +946,39 @@
     }
 
     // ============================================================
-    // 轮次测评：第一步选择题 → 第二步立场变化
+    // 轮次测评：选择题 + 观点是否改变
     // ============================================================
     async function startAssessment() {
-        // 重置所有测评相关状态
+        // 重置测评状态
         state.quizAnswer = null;
-        state.inspiredByAi = null;
         state.stanceChanged = null;
         state.quizSubmitted = false;
 
-        // 重置测评区可见性
+        // 显示测评区域
         document.getElementById('assessmentArea').style.display = 'block';
         document.getElementById('quizLoading').style.display = 'block';
         document.getElementById('quizContent').style.display = 'none';
-        document.getElementById('quizSubmitArea').style.display = 'none';
-        document.getElementById('quizResult').style.display = 'none';
-        document.getElementById('inspiredSection').style.display = 'none';
         document.getElementById('stanceSection').style.display = 'none';
+        document.getElementById('assessmentSubmitArea').style.display = 'none';
+        document.getElementById('quizResult').style.display = 'none';
         document.getElementById('roundCompleteArea').style.display = 'none';
 
-        // 重置选择题提交按钮
-        const quizBtn = document.getElementById('submitQuizBtn');
-        quizBtn.disabled = false;
-        quizBtn.innerHTML = '📩 提交答案';
-
-        // 重置启发选择
-        document.getElementById('inspiredYes').className = 'inspired-option';
-        document.getElementById('inspiredNo').className = 'inspired-option';
-        document.getElementById('inspiredSubmitArea').style.display = 'none';
-        const inspiredBtn = document.getElementById('submitInspiredBtn');
-        inspiredBtn.disabled = false;
-        inspiredBtn.innerHTML = '👉 下一步';
-
-        // 重置立场选择按钮
-        document.getElementById('stanceChanged').className = 'stance-option';
-        document.getElementById('stanceUnchanged').className = 'stance-option';
-        document.getElementById('stanceSubmitArea').style.display = 'none';
-        const stanceBtn = document.getElementById('submitStanceBtn');
-        stanceBtn.disabled = false;
-        stanceBtn.innerHTML = '✅ 确认，继续辩论';
-
-        // 重置继续辩论区按钮
-        document.getElementById('continueArgument').value = '';
-        const continueBtn = document.getElementById('continueBtn');
-        continueBtn.disabled = true;
-        continueBtn.innerHTML = '🔥 继续辩论！';
-        const endBtn = document.getElementById('endDebateBtn');
-        endBtn.disabled = false;
-        endBtn.innerHTML = '🏁 结束辩论';
+        // 重置立场选择样式
+        document.getElementById('stanceChanged').classList.remove('selected');
+        document.getElementById('stanceUnchanged').classList.remove('selected');
 
         setTimeout(() => {
             document.getElementById('assessmentArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 200);
 
         try {
-            const quizUrl = state.currentRound === 1
+            let quizUrl = state.currentRound === 1
                 ? `/api/debate/quiz/${state.sessionId}`
                 : `/api/debate/quiz_round/${state.currentRoundId}`;
 
             const quizData = await apiFetch(quizUrl, { method: 'POST' });
 
+            // 显示选择题
             document.getElementById('quizLoading').style.display = 'none';
             document.getElementById('quizContent').style.display = 'block';
             document.getElementById('quizQuestion').textContent = quizData.question;
@@ -1366,13 +989,16 @@
                 const letter = opt.charAt(0);
                 const div = document.createElement('div');
                 div.className = 'quiz-option';
-                div.setAttribute('data-letter', letter);
-                div.textContent = opt.substring(2).trim();
+                div.textContent = opt;
                 div.onclick = () => selectQuizOption(letter, div);
                 optionsContainer.appendChild(div);
             });
 
+            // 同时显示立场问题
+            document.getElementById('stanceSection').style.display = 'block';
+
         } catch (error) {
+            // 出题失败，跳过测评直接进入下一步
             document.getElementById('assessmentArea').style.display = 'none';
             document.getElementById('roundCompleteArea').style.display = 'block';
             showToast('出题失败，已跳过小测', 'warning');
@@ -1385,29 +1011,41 @@
         state.quizAnswer = letter;
         document.querySelectorAll('.quiz-option').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
-        document.getElementById('quizSubmitArea').style.display = 'block';
+        checkAssessmentReady();
     }
 
-    async function submitQuiz() {
-        if (!state.quizAnswer || state.quizSubmitted) return;
+    function selectStanceChange(changed) {
+        state.stanceChanged = changed;
+        document.getElementById('stanceChanged').classList.toggle('selected', changed === true);
+        document.getElementById('stanceUnchanged').classList.toggle('selected', changed === false);
+        checkAssessmentReady();
+    }
+
+    function checkAssessmentReady() {
+        const ready = state.quizAnswer !== null && state.stanceChanged !== null;
+        document.getElementById('assessmentSubmitArea').style.display = ready ? 'block' : 'none';
+    }
+
+    async function submitAssessment() {
+        if (state.quizSubmitted) return;
         state.quizSubmitted = true;
 
-        const btn = document.getElementById('submitQuizBtn');
+        const btn = document.getElementById('submitAssessmentBtn');
         btn.disabled = true;
         btn.innerHTML = '⏳ 提交中...';
 
         try {
-            const answerUrl = state.currentRound === 1
+            let answerUrl = state.currentRound === 1
                 ? `/api/debate/answer/${state.sessionId}`
                 : `/api/debate/answer_round/${state.currentRoundId}`;
 
             const result = await apiFetch(answerUrl, {
                 method: 'POST',
-                body: JSON.stringify({ answer: state.quizAnswer }),
+                body: JSON.stringify({
+                    answer: state.quizAnswer,
+                    stance_changed: state.stanceChanged,
+                }),
             });
-
-            // 隐藏提交按钮
-            document.getElementById('quizSubmitArea').style.display = 'none';
 
             // 显示答题结果
             const resultDiv = document.getElementById('quizResult');
@@ -1416,14 +1054,14 @@
                 resultDiv.textContent = '✅ 回答正确！你很好地理解了 AI 的观点。';
             } else {
                 resultDiv.className = 'quiz-result wrong';
-                resultDiv.textContent = `❌ 回答不正确，正确答案是 ${result.correct_answer}`;
+                resultDiv.textContent = `❌ 回答不正确。正确答案是 ${result.correct_answer}。`;
             }
             resultDiv.style.display = 'block';
 
-            // 标记选项正确/错误
+            // 标记选项
             document.querySelectorAll('.quiz-option').forEach(el => {
                 el.classList.add('disabled');
-                const optLetter = el.getAttribute('data-letter');
+                const optLetter = el.textContent.charAt(0);
                 if (optLetter === result.correct_answer) {
                     el.classList.add('correct');
                 } else if (optLetter === state.quizAnswer && !result.is_correct) {
@@ -1431,96 +1069,18 @@
                 }
             });
 
-            // 延迟后弹出启发问题
-            setTimeout(() => {
-                document.getElementById('inspiredSection').style.display = 'block';
-                document.getElementById('inspiredSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 600);
-
-        } catch (error) {
-            btn.disabled = false;
-            btn.innerHTML = '📩 提交答案';
-            state.quizSubmitted = false;
-            console.error(error);
-        }
-    }
-
-    function selectInspired(yes) {
-        state.inspiredByAi = yes;
-        document.getElementById('inspiredYes').className = 'inspired-option' + (yes === true ? ' selected-yes' : '');
-        document.getElementById('inspiredNo').className = 'inspired-option' + (yes === false ? ' selected-no' : '');
-        document.getElementById('inspiredSubmitArea').style.display = 'block';
-    }
-
-    async function submitInspired() {
-        if (state.inspiredByAi === null) return;
-
-        const btn = document.getElementById('submitInspiredBtn');
-        btn.disabled = true;
-        btn.innerHTML = '⏳ 提交中...';
-
-        try {
-            const answerUrl = state.currentRound === 1
-                ? `/api/debate/answer/${state.sessionId}`
-                : `/api/debate/answer_round/${state.currentRoundId}`;
-
-            await apiFetch(answerUrl, {
-                method: 'POST',
-                body: JSON.stringify({ inspired_by_ai: state.inspiredByAi }),
-            });
-
-            btn.innerHTML = '✅ 已提交';
-
-            // 延迟后显示立场变化问题
-            setTimeout(() => {
-                document.getElementById('stanceSection').style.display = 'block';
-                document.getElementById('stanceSection').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 400);
-
-        } catch (error) {
-            btn.disabled = false;
-            btn.innerHTML = '👉 下一步';
-            console.error(error);
-        }
-    }
-
-    function selectStanceChange(changed) {
-        state.stanceChanged = changed;
-        const changedEl = document.getElementById('stanceChanged');
-        const unchangedEl = document.getElementById('stanceUnchanged');
-        changedEl.className = 'stance-option' + (changed === true ? ' selected-changed' : '');
-        unchangedEl.className = 'stance-option' + (changed === false ? ' selected-unchanged' : '');
-        document.getElementById('stanceSubmitArea').style.display = 'block';
-    }
-
-    async function submitStance() {
-        if (state.stanceChanged === null) return;
-
-        const btn = document.getElementById('submitStanceBtn');
-        btn.disabled = true;
-        btn.innerHTML = '⏳ 提交中...';
-
-        try {
-            const answerUrl = state.currentRound === 1
-                ? `/api/debate/answer/${state.sessionId}`
-                : `/api/debate/answer_round/${state.currentRoundId}`;
-
-            await apiFetch(answerUrl, {
-                method: 'POST',
-                body: JSON.stringify({ stance_changed: state.stanceChanged }),
-            });
-
-            btn.innerHTML = '✅ 已提交';
             showToast('测评完成！', 'success');
 
+            // 短暂延迟后显示继续辩论区
             setTimeout(() => {
                 document.getElementById('roundCompleteArea').style.display = 'block';
                 document.getElementById('roundCompleteArea').scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 500);
+            }, 800);
 
         } catch (error) {
             btn.disabled = false;
-            btn.innerHTML = '✅ 确认，继续辩论';
+            btn.innerHTML = '✅ 提交，继续';
+            state.quizSubmitted = false;
             console.error(error);
         }
     }

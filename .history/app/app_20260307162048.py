@@ -3,12 +3,12 @@
 """
 import os
 import random
+from datetime import datetime
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from config import Config
 from models import db, DebateSession, DebateRound
 from questions import get_all_topics, get_topic_by_id, get_all_categories
-from llm_api import enhance_argument, refute_argument, generate_quiz
-import json
+from llm_api import enhance_argument, refute_argument
 
 
 def _ensure_database_exists(db_uri: str) -> None:
@@ -83,68 +83,6 @@ def _ensure_database_exists(db_uri: str) -> None:
             print(f"[DB] 检测/创建数据库时出错（将继续尝试连接）: {e}")
 
 
-def _migrate_sync_columns(app):
-    """
-    对比 SQLAlchemy 模型定义与数据库中实际存在的列：
-    1. 补充模型中有但数据库中缺失的列（ADD COLUMN）
-    2. 删除数据库中有但模型中已不存在的废弃列（DROP COLUMN）
-    适用于 MySQL / PostgreSQL / SQLite（3.35.0+）。
-    """
-    from sqlalchemy import inspect as sa_inspect, text
-
-    engine = db.engine
-    inspector = sa_inspect(engine)
-    is_sqlite = str(engine.url).startswith("sqlite")
-
-    for table_name, model_table in db.Model.metadata.tables.items():
-        if not inspector.has_table(table_name):
-            continue
-
-        existing_cols = {c["name"] for c in inspector.get_columns(table_name)}
-        model_cols = {col.name for col in model_table.columns}
-
-        # ── 1. 添加缺失的列 ──
-        for col in model_table.columns:
-            if col.name in existing_cols:
-                continue
-
-            col_type = col.type.compile(dialect=engine.dialect)
-            nullable = "NULL" if col.nullable else "NOT NULL"
-            default_clause = ""
-            if col.default is not None and col.default.is_scalar:
-                val = col.default.arg
-                if isinstance(val, bool):
-                    default_clause = f" DEFAULT {1 if val else 0}"
-                elif isinstance(val, (int, float)):
-                    default_clause = f" DEFAULT {val}"
-                elif isinstance(val, str):
-                    default_clause = f" DEFAULT '{val}'"
-
-            sql = f"ALTER TABLE `{table_name}` ADD COLUMN `{col.name}` {col_type} {nullable}{default_clause}"
-            try:
-                with engine.connect() as conn:
-                    conn.execute(text(sql))
-                    conn.commit()
-                print(f"[DB] 已为表 {table_name} 添加列: {col.name}")
-            except Exception as e:
-                print(f"[DB] 添加列 {table_name}.{col.name} 时出错: {e}")
-
-        # ── 2. 删除废弃的列 ──
-        obsolete_cols = existing_cols - model_cols
-        for col_name in obsolete_cols:
-            try:
-                if is_sqlite:
-                    sql = f'ALTER TABLE "{table_name}" DROP COLUMN "{col_name}"'
-                else:
-                    sql = f"ALTER TABLE `{table_name}` DROP COLUMN `{col_name}`"
-                with engine.connect() as conn:
-                    conn.execute(text(sql))
-                    conn.commit()
-                print(f"[DB] 已从表 {table_name} 删除废弃列: {col_name}")
-            except Exception as e:
-                print(f"[DB] 删除列 {table_name}.{col_name} 时出错（可忽略）: {e}")
-
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -155,8 +93,7 @@ def create_app():
     db.init_app(app)
     with app.app_context():
         db.create_all()
-        _migrate_sync_columns(app)
-        print("[DB] 所有数据表已就绪（不存在的表已自动创建，列已同步）")
+        print("[DB] 所有数据表已就绪（不存在的表已自动创建）")
 
     return app
 
@@ -209,7 +146,18 @@ def result_page(session_id):
 def history_page():
     """历史记录页面"""
     sessions = DebateSession.query.order_by(DebateSession.created_at.desc()).all()
-    return render_template('history.html', sessions=sessions)
+    annotated_count = sum(1 for s in sessions if s.stance_changed is not None)
+    pending_count = len(sessions) - annotated_count
+    return render_template('history.html', sessions=sessions,
+                           annotated_count=annotated_count, pending_count=pending_count)
+
+
+@app.route('/annotate/<session_id>')
+def annotate_page(session_id):
+    """标注页面"""
+    session = DebateSession.query.get_or_404(session_id)
+    topic = get_topic_by_id(session.topic_id)
+    return render_template('annotate.html', session=session, topic=topic)
 
 
 # ============================================================
@@ -274,8 +222,6 @@ def enhance(session_id):
     """
     session = DebateSession.query.get_or_404(session_id)
 
-    is_regenerate = session.enhanced_argument is not None
-
     enhanced = enhance_argument(
         config=app.config,
         topic_title=session.topic_title,
@@ -284,8 +230,6 @@ def enhance(session_id):
     )
 
     session.enhanced_argument = enhanced
-    if is_regenerate:
-        session.enhance_regenerate_count = (session.enhance_regenerate_count or 0) + 1
     db.session.commit()
 
     return jsonify({
@@ -318,26 +262,6 @@ def update_enhanced_round(round_id):
     debate_round.enhanced_argument = edited
     db.session.commit()
     return jsonify({"success": True, "enhanced_argument": edited})
-
-
-@app.route('/api/debate/enhance_approve/<session_id>', methods=['POST'])
-def enhance_approve(session_id):
-    """记录学生对润色观点的认可度"""
-    session = DebateSession.query.get_or_404(session_id)
-    data = request.json
-    session.enhance_approved = bool(data.get('approved'))
-    db.session.commit()
-    return jsonify({"success": True})
-
-
-@app.route('/api/debate/enhance_approve_round/<round_id>', methods=['POST'])
-def enhance_approve_round(round_id):
-    """记录某一轮学生对润色观点的认可度"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    data = request.json
-    debate_round.enhance_approved = bool(data.get('approved'))
-    db.session.commit()
-    return jsonify({"success": True})
 
 
 @app.route('/api/debate/refute/<session_id>', methods=['POST'])
@@ -446,8 +370,6 @@ def enhance_round(round_id):
     debate_round = DebateRound.query.get_or_404(round_id)
     session = DebateSession.query.get_or_404(debate_round.session_id)
 
-    is_regenerate = debate_round.enhanced_argument is not None
-
     # 构建到当前轮次之前的历史
     history = _build_debate_history(session, up_to_round=debate_round.round_number)
 
@@ -460,8 +382,6 @@ def enhance_round(round_id):
     )
 
     debate_round.enhanced_argument = enhanced
-    if is_regenerate:
-        debate_round.enhance_regenerate_count = (debate_round.enhance_regenerate_count or 0) + 1
     db.session.commit()
 
     return jsonify({
@@ -503,118 +423,36 @@ def refute_round(round_id):
     })
 
 
-@app.route('/api/debate/quiz/<session_id>', methods=['POST'])
-def quiz_for_session(session_id):
-    """为第 1 轮生成理解力选择题"""
-    session = DebateSession.query.get_or_404(session_id)
-    if not session.refutation:
-        return jsonify({"success": False, "message": "还没有反驳内容"}), 400
-
-    quiz = generate_quiz(
-        config=app.config,
-        topic_title=session.topic_title,
-        side=session.chosen_side_text,
-        refutation=session.refutation,
-    )
-    if not quiz:
-        return jsonify({"success": False, "message": "出题失败，请重试"}), 500
-
-    session.quiz_question = quiz["question"]
-    session.quiz_options = json.dumps(quiz["options"], ensure_ascii=False)
-    session.quiz_correct_answer = quiz["answer"]
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "question": quiz["question"],
-        "options": quiz["options"],
-    })
-
-
-@app.route('/api/debate/quiz_round/<round_id>', methods=['POST'])
-def quiz_for_round(round_id):
-    """为第 2 轮及之后生成理解力选择题"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    session = DebateSession.query.get_or_404(debate_round.session_id)
-    if not debate_round.refutation:
-        return jsonify({"success": False, "message": "还没有反驳内容"}), 400
-
-    quiz = generate_quiz(
-        config=app.config,
-        topic_title=session.topic_title,
-        side=session.chosen_side_text,
-        refutation=debate_round.refutation,
-    )
-    if not quiz:
-        return jsonify({"success": False, "message": "出题失败，请重试"}), 500
-
-    debate_round.quiz_question = quiz["question"]
-    debate_round.quiz_options = json.dumps(quiz["options"], ensure_ascii=False)
-    debate_round.quiz_correct_answer = quiz["answer"]
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "question": quiz["question"],
-        "options": quiz["options"],
-    })
-
-
-@app.route('/api/debate/answer/<session_id>', methods=['POST'])
-def answer_quiz_session(session_id):
-    """提交第 1 轮的测评数据（选择题答案 / 是否被启发 / 立场变化，可分步提交）"""
+@app.route('/api/annotate/<session_id>', methods=['POST'])
+def annotate(session_id):
+    """
+    人工标注 + 学生测评接口
+    请求参数:
+        stance_changed: bool, 用户立场是否改变
+        annotation_note: str, 标注备注（可选）
+        eval_understandable: int (1-5), 能理解
+        eval_seen: int (1-5), 被看见
+        eval_educational: int (1-5), 懂教育
+        eval_comment: str, 学生对 AI 的自由评价（可选）
+    """
     session = DebateSession.query.get_or_404(session_id)
     data = request.json
 
-    student_answer = data.get('answer', '').strip().upper() if data.get('answer') else ''
-    inspired_by_ai = data.get('inspired_by_ai')
-    stance_changed = data.get('stance_changed')
+    # 学生测评
+    session.eval_understandable = data.get('eval_understandable')
+    session.eval_seen = data.get('eval_seen')
+    session.eval_educational = data.get('eval_educational')
+    session.eval_comment = data.get('eval_comment', '')
 
-    if student_answer:
-        session.quiz_student_answer = student_answer
-        session.quiz_is_correct = (student_answer == session.quiz_correct_answer)
-
-    if inspired_by_ai is not None:
-        session.inspired_by_ai = inspired_by_ai
-
-    if stance_changed is not None:
-        session.stance_changed = stance_changed
-
+    # 人工标注
+    session.stance_changed = data.get('stance_changed')
+    session.annotation_note = data.get('annotation_note', '')
+    session.annotated_at = datetime.utcnow()
     db.session.commit()
 
     return jsonify({
         "success": True,
-        "is_correct": session.quiz_is_correct,
-        "correct_answer": session.quiz_correct_answer,
-    })
-
-
-@app.route('/api/debate/answer_round/<round_id>', methods=['POST'])
-def answer_quiz_round(round_id):
-    """提交第 2 轮及之后的测评数据（选择题答案 / 是否被启发 / 立场变化，可分步提交）"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    data = request.json
-
-    student_answer = data.get('answer', '').strip().upper() if data.get('answer') else ''
-    inspired_by_ai = data.get('inspired_by_ai')
-    stance_changed = data.get('stance_changed')
-
-    if student_answer:
-        debate_round.quiz_student_answer = student_answer
-        debate_round.quiz_is_correct = (student_answer == debate_round.quiz_correct_answer)
-
-    if inspired_by_ai is not None:
-        debate_round.inspired_by_ai = inspired_by_ai
-
-    if stance_changed is not None:
-        debate_round.stance_changed = stance_changed
-
-    db.session.commit()
-
-    return jsonify({
-        "success": True,
-        "is_correct": debate_round.quiz_is_correct,
-        "correct_answer": debate_round.quiz_correct_answer,
+        "message": "保存成功",
     })
 
 
@@ -630,10 +468,10 @@ def get_sessions():
 
 @app.route('/api/export', methods=['GET'])
 def export_data():
-    """导出所有辩论数据"""
-    sessions = DebateSession.query.order_by(
-        DebateSession.created_at.desc()
-    ).all()
+    """导出所有已标注的数据"""
+    sessions = DebateSession.query.filter(
+        DebateSession.stance_changed.isnot(None)
+    ).order_by(DebateSession.created_at.desc()).all()
     return jsonify({
         "success": True,
         "data": [s.to_dict() for s in sessions],

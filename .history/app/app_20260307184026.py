@@ -83,28 +83,23 @@ def _ensure_database_exists(db_uri: str) -> None:
             print(f"[DB] 检测/创建数据库时出错（将继续尝试连接）: {e}")
 
 
-def _migrate_sync_columns(app):
+def _migrate_add_missing_columns(app):
     """
-    对比 SQLAlchemy 模型定义与数据库中实际存在的列：
-    1. 补充模型中有但数据库中缺失的列（ADD COLUMN）
-    2. 删除数据库中有但模型中已不存在的废弃列（DROP COLUMN）
-    适用于 MySQL / PostgreSQL / SQLite（3.35.0+）。
+    对比 SQLAlchemy 模型定义与数据库中实际存在的列，
+    自动为已有表补充缺失的列（仅做 ADD COLUMN，不删不改）。
+    适用于 MySQL / PostgreSQL / SQLite。
     """
     from sqlalchemy import inspect as sa_inspect, text
 
     engine = db.engine
     inspector = sa_inspect(engine)
-    is_sqlite = str(engine.url).startswith("sqlite")
 
-    for table_name, model_table in db.Model.metadata.tables.items():
+    for table_name, model_class in db.Model.metadata.tables.items():
         if not inspector.has_table(table_name):
             continue
 
         existing_cols = {c["name"] for c in inspector.get_columns(table_name)}
-        model_cols = {col.name for col in model_table.columns}
-
-        # ── 1. 添加缺失的列 ──
-        for col in model_table.columns:
+        for col in model_class.columns:
             if col.name in existing_cols:
                 continue
 
@@ -129,21 +124,6 @@ def _migrate_sync_columns(app):
             except Exception as e:
                 print(f"[DB] 添加列 {table_name}.{col.name} 时出错: {e}")
 
-        # ── 2. 删除废弃的列 ──
-        obsolete_cols = existing_cols - model_cols
-        for col_name in obsolete_cols:
-            try:
-                if is_sqlite:
-                    sql = f'ALTER TABLE "{table_name}" DROP COLUMN "{col_name}"'
-                else:
-                    sql = f"ALTER TABLE `{table_name}` DROP COLUMN `{col_name}`"
-                with engine.connect() as conn:
-                    conn.execute(text(sql))
-                    conn.commit()
-                print(f"[DB] 已从表 {table_name} 删除废弃列: {col_name}")
-            except Exception as e:
-                print(f"[DB] 删除列 {table_name}.{col_name} 时出错（可忽略）: {e}")
-
 
 def create_app():
     app = Flask(__name__)
@@ -155,8 +135,8 @@ def create_app():
     db.init_app(app)
     with app.app_context():
         db.create_all()
-        _migrate_sync_columns(app)
-        print("[DB] 所有数据表已就绪（不存在的表已自动创建，列已同步）")
+        _migrate_add_missing_columns(app)
+        print("[DB] 所有数据表已就绪（不存在的表已自动创建，缺失列已补充）")
 
     return app
 
@@ -318,26 +298,6 @@ def update_enhanced_round(round_id):
     debate_round.enhanced_argument = edited
     db.session.commit()
     return jsonify({"success": True, "enhanced_argument": edited})
-
-
-@app.route('/api/debate/enhance_approve/<session_id>', methods=['POST'])
-def enhance_approve(session_id):
-    """记录学生对润色观点的认可度"""
-    session = DebateSession.query.get_or_404(session_id)
-    data = request.json
-    session.enhance_approved = bool(data.get('approved'))
-    db.session.commit()
-    return jsonify({"success": True})
-
-
-@app.route('/api/debate/enhance_approve_round/<round_id>', methods=['POST'])
-def enhance_approve_round(round_id):
-    """记录某一轮学生对润色观点的认可度"""
-    debate_round = DebateRound.query.get_or_404(round_id)
-    data = request.json
-    debate_round.enhance_approved = bool(data.get('approved'))
-    db.session.commit()
-    return jsonify({"success": True})
 
 
 @app.route('/api/debate/refute/<session_id>', methods=['POST'])

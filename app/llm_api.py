@@ -4,7 +4,9 @@
 本文件封装了与大语言模型交互的接口，包括：
 1. "加持"模型 —— 润色学生观点
 2. "反驳"模型 —— 反驳学生观点（随机抽取一个模型）
+3. "出题"模型 —— 每轮反驳后生成理解力选择题
 """
+import json
 import random
 import requests
 
@@ -247,3 +249,55 @@ def refute_argument(config, topic_title, side, enhanced_argument, history=None, 
     )
 
     return result, chosen_model_name
+
+
+def generate_quiz(config, topic_title, side, refutation):
+    """
+    "出题"模型：根据 AI 的反驳内容生成一道四选一的理解力选择题。
+
+    返回:
+        dict: {"question": str, "options": ["A. ...", ...], "answer": "A"}
+              解析失败时返回 None
+    """
+    system_prompt = (
+        "你是一个面向中小学生的阅读理解出题专家。\n"
+        "根据给定的一段文字（AI 在辩论中的反驳），出一道四选一的选择题来检验学生是否理解了这段话的核心意思。\n\n"
+        "要求：\n"
+        "1. 题目用通俗易懂的语言，适合中小学生\n"
+        "2. 四个选项中只有一个正确答案，其余三个为干扰项\n"
+        "3. 干扰项要有一定迷惑性，但不要过于刁钻\n"
+        "4. 严格按照下面的 JSON 格式输出，不要输出任何其他内容：\n"
+        '{"question": "题目内容", "options": ["A. 选项1", "B. 选项2", "C. 选项3", "D. 选项4"], "answer": "A"}\n'
+        "其中 answer 只填选项字母（A/B/C/D）。"
+    )
+
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": (
+            f"辩题：{topic_title}\n"
+            f"学生立场：{side}\n\n"
+            f"AI 的反驳内容：\n{refutation}\n\n"
+            f"请根据这段反驳内容出一道选择题。"
+        )},
+    ]
+
+    raw = call_llm_api(
+        api_url=config["QUIZ_MODEL_API_URL"],
+        api_key=config["QUIZ_MODEL_API_KEY"],
+        model=config["QUIZ_MODEL_NAME"],
+        messages=messages,
+        temperature=0.3,
+    )
+
+    # 解析 JSON —— 模型可能包裹 ```json ... ```
+    try:
+        text = raw.strip()
+        if text.startswith("```"):
+            text = text.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+        data = json.loads(text)
+        if "question" in data and "options" in data and "answer" in data:
+            return data
+    except (json.JSONDecodeError, KeyError, IndexError):
+        pass
+
+    return None
