@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tl_psychology_web
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./app/.env
+    volumes:
+      # 将数据库文件持久化到宿主机，避免容器重建后数据丢失
+      - ./data:/app/instance
+    environment:
+      # 若 .env 里的 DATABASE_URL 使用 SQLite，数据库会保存在上方挂载的 ./data 目录
+      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/instance/debate.db}
