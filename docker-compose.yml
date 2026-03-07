@@ -1,6 +1,40 @@
 version: "3.9"
 
+# ============================================================
+# 使用说明
+# ============================================================
+# 方式一（内置 MySQL，推荐新环境）：
+#   docker-compose up -d
+#   数据库账号密码在下方 db 服务的 environment 中配置。
+#
+# 方式二（外部 MySQL，已有数据库服务器）：
+#   在 app/.env 中设置 DATABASE_URL，然后只启动 web 服务：
+#   docker-compose up -d web
+# ============================================================
+
 services:
+
+  # ── MySQL 数据库（内置，可选）──────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: tl_psychology_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-debate_db}
+      MYSQL_USER: ${MYSQL_USER:-debate_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-debate_pass}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost",
+             "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── Flask Web 应用 ─────────────────────────────────────────
   web:
     build:
       context: .
@@ -11,9 +45,13 @@ services:
       - "5000:5000"
     env_file:
       - ./app/.env
-    volumes:
-      # 将数据库文件持久化到宿主机，避免容器重建后数据丢失
-      - ./data:/app/instance
     environment:
-      # 若 .env 里的 DATABASE_URL 使用 SQLite，数据库会保存在上方挂载的 ./data 目录
-      - DATABASE_URL=${DATABASE_URL:-sqlite:////app/instance/debate.db}
+      # 优先使用 .env 里的 DATABASE_URL；
+      # 若未设置，默认连接上方的内置 MySQL 容器。
+      DATABASE_URL: ${DATABASE_URL:-mysql+pymysql://debate_user:debate_pass@db:3306/debate_db}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

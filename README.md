@@ -9,25 +9,36 @@
 ### 前置要求
 - Docker + Docker Compose（[安装文档](https://docs.docker.com/get-docker/)）
 
-### 步骤
+### 方式一：内置 MySQL（推荐，无需提前准备数据库）
 
 ```bash
 # 1. 克隆仓库
 git clone <your-repo-url>
 cd TL_Psychology
 
-# 2. 配置环境变量（填入真实的 API 密钥）
+# 2. 配置环境变量
 cp app/env.example app/.env
-# 编辑 app/.env，填写 ENHANCE_MODEL_API_KEY、REFUTE_MODEL_API_KEY 等
+# 编辑 app/.env，填写 ENHANCE_MODEL_API_KEY、REFUTE_MODEL_API_KEY
+# DATABASE_URL 保持默认即可（已指向内置 MySQL 容器）
 
-# 3. 一键启动
+# 3. 一键启动（会同时启动 MySQL 容器和 Web 容器）
 docker-compose up -d
 
 # 4. 访问
 # 浏览器打开 http://localhost:5000
 ```
 
-> 数据库会**自动创建**，无需手动初始化。SQLite 数据文件保存在 `./data/` 目录，容器重建后数据不丢失。
+> 数据库和表会**自动创建**，MySQL 数据持久化在 Docker volume `mysql_data` 中，容器重建后数据不丢失。
+
+### 方式二：使用已有 MySQL 服务器
+
+```bash
+# app/.env 中修改 DATABASE_URL，指向你的 MySQL 服务器
+DATABASE_URL=mysql+pymysql://用户名:密码@主机地址:3306/数据库名
+
+# 只启动 web 服务（跳过内置 MySQL 容器）
+docker-compose up -d web
+```
 
 ### 停止 / 重启
 
