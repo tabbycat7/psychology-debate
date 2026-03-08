@@ -32,6 +32,8 @@ class DebateSession(db.Model):
     # 辩题信息
     topic_id = db.Column(db.String(50), nullable=False)
     topic_title = db.Column(db.String(500), nullable=False)
+    # 辩题对应的测评“命中”立场（如 side_a / side_b），来自 questions 中的 hit 字段
+    topic_hit = db.Column(db.String(20), nullable=True)
 
     # 学生选择的立场 ('side_a' 或 'side_b')
     chosen_side = db.Column(db.String(10), nullable=False)
@@ -78,6 +80,7 @@ class DebateSession(db.Model):
             "student_grade": self.student_grade,
             "topic_id": self.topic_id,
             "topic_title": self.topic_title,
+            "topic_hit": self.topic_hit,
             "chosen_side": self.chosen_side,
             "chosen_side_text": self.chosen_side_text,
             "user_argument": self.user_argument,
