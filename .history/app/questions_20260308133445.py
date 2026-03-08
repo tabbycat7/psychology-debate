@@ -600,7 +600,6 @@ DEBATE_TOPICS = [
   },
   {
     "id": 66,
-    "category": "身体症状",
     "title": "只要稍微吃点凉的或一紧张，肚子就立刻翻江倒海，我是该赶紧随身带上肠胃药，还是该揉揉肚子觉得过一会儿自己就好了？",
     "description": "最近小明发现自己的肚子特别娇气，哪怕只是午饭吃得稍微快了一点，或者下午马上要随堂测验，胃里就会一阵酸胀绞痛",
     "side_a": "赶紧吃一粒随身带的肠胃药",
@@ -931,10 +930,10 @@ def get_topic_by_id(topic_id):
 
 
 def get_topics_by_category(category):
-    """根据分类获取辩题"""
-    return [t for t in DEBATE_TOPICS if t["category"] == category]
+    """根据分类获取辩题（无 category 的条目不参与匹配）"""
+    return [t for t in DEBATE_TOPICS if t.get("category") == category]
 
 
 def get_all_categories():
-    """获取所有分类"""
-    return list(set(t["category"] for t in DEBATE_TOPICS))
+    """获取所有分类（仅包含带 category 的辩题，避免 KeyError）"""
+    return list(set(t["category"] for t in DEBATE_TOPICS if "category" in t and t["category"]))
