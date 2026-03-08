@@ -1,6 +1,7 @@
 """
 数据库模型定义
 """
+import json
 import uuid
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +17,11 @@ def generate_session_id():
 def generate_round_id():
     """生成 R- 前缀的轮次ID"""
     return f"R-{uuid.uuid4().hex[:12]}"
+
+
+def generate_storybook_id():
+    """生成 B- 前缀的绘本ID"""
+    return f"B-{uuid.uuid4().hex[:12]}"
 
 
 class DebateSession(db.Model):
@@ -150,3 +156,86 @@ class DebateRound(db.Model):
             "stance_changed": self.stance_changed,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+
+
+class Storybook(db.Model):
+    """心理绘本记录（支持多版本）"""
+    __tablename__ = 'storybooks'
+
+    id = db.Column(db.String(20), primary_key=True, default=generate_storybook_id)
+    session_id = db.Column(db.String(20), db.ForeignKey('debate_sessions.id'), nullable=False)
+
+    # 版本号（同一 session 下可有多个版本）
+    version = db.Column(db.Integer, default=1)
+
+    # 绘本标题（由模型生成或默认）
+    title = db.Column(db.String(200), nullable=True)
+
+    # 绘本分镜数据 (JSON格式存储)
+    # 格式: [{"scene": 1, "title": "...", "description": "...", "image_prompt": "...", "image_id": "..."}, ...]
+    scenes_json = db.Column(db.Text, nullable=True)
+
+    # 生成状态: pending / generating_script / generating_images / completed / failed
+    status = db.Column(db.String(20), default='pending')
+    error_message = db.Column(db.Text, nullable=True)
+
+    # 时间戳
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # 关联辩论会话（改为支持多个绘本）
+    session = db.relationship('DebateSession', backref=db.backref('storybooks', lazy=True, order_by='Storybook.version.desc()'))
+
+    def get_scenes(self):
+        """解析并返回分镜列表"""
+        if self.scenes_json:
+            try:
+                return json.loads(self.scenes_json)
+            except json.JSONDecodeError:
+                return []
+        return []
+
+    def set_scenes(self, scenes):
+        """设置分镜列表"""
+        self.scenes_json = json.dumps(scenes, ensure_ascii=False)
+
+    def to_dict(self):
+        scenes = self.get_scenes()
+        for scene in scenes:
+            if 'image_id' in scene:
+                scene['image_id'] = scene['image_id']
+        return {
+            "id": self.id,
+            "session_id": self.session_id,
+            "version": self.version,
+            "title": self.title,
+            "scenes": scenes,
+            "status": self.status,
+            "error_message": self.error_message,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+def generate_image_id():
+    """生成 I- 前缀的图片ID"""
+    return f"I-{uuid.uuid4().hex[:12]}"
+
+
+class StorybookImage(db.Model):
+    """绘本图片存储（二进制）"""
+    __tablename__ = 'storybook_images'
+
+    id = db.Column(db.String(20), primary_key=True, default=generate_image_id)
+    storybook_id = db.Column(db.String(20), db.ForeignKey('storybooks.id'), nullable=False)
+    scene_number = db.Column(db.Integer, nullable=False)
+
+    # 图片数据（使用 LONGBLOB 支持大图片，最大 4GB）
+    image_data = db.Column(db.LargeBinary().with_variant(db.LargeBinary(length=2**32-1), 'mysql'), nullable=False)
+    # 图片格式：png / jpg / webp
+    image_format = db.Column(db.String(10), default='png')
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # 关联绘本
+    storybook = db.relationship('Storybook', backref=db.backref('images', lazy=True))

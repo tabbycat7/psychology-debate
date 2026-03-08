@@ -692,7 +692,7 @@ def _generate_storybook_task(app_context, storybook_id, session_id, debate_histo
     """
     with app_context:
         try:
-            storybook = db.session.get(Storybook, storybook_id)
+            storybook = Storybook.query.get(storybook_id)
             if not storybook or storybook.status == 'cancelled':
                 print(f"[绘本任务] {storybook_id} 已取消或不存在")
                 return
@@ -708,7 +708,7 @@ def _generate_storybook_task(app_context, storybook_id, session_id, debate_histo
             )
 
             # 检查是否被取消
-            storybook = db.session.get(Storybook, storybook_id)
+            storybook = Storybook.query.get(storybook_id)
             if not storybook or storybook.status == 'cancelled':
                 print(f"[绘本任务] {storybook_id} 已取消")
                 return
@@ -737,7 +737,7 @@ def _generate_storybook_task(app_context, storybook_id, session_id, debate_histo
             )
 
             # 再次检查是否被取消
-            storybook = db.session.get(Storybook, storybook_id)
+            storybook = Storybook.query.get(storybook_id)
             if not storybook or storybook.status == 'cancelled':
                 print(f"[绘本任务] {storybook_id} 已取消")
                 return
@@ -751,7 +751,7 @@ def _generate_storybook_task(app_context, storybook_id, session_id, debate_histo
         except Exception as e:
             print(f"[绘本任务错误] {storybook_id}: {e}")
             try:
-                storybook = db.session.get(Storybook, storybook_id)
+                storybook = Storybook.query.get(storybook_id)
                 if storybook and storybook.status not in ['cancelled', 'completed']:
                     storybook.status = 'failed'
                     storybook.error_message = str(e)[:500]

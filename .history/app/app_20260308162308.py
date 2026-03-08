@@ -3,12 +3,11 @@
 """
 import os
 import random
-import threading
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 from config import Config
-from models import db, DebateSession, DebateRound, Storybook, StorybookImage
+from models import db, DebateSession, DebateRound, Storybook
 from questions import get_all_topics, get_topic_by_id, get_all_categories
-from llm_api import enhance_argument, refute_argument, generate_quiz, generate_storybook_script, generate_storybook_images_to_db
+from llm_api import enhance_argument, refute_argument, generate_quiz, generate_storybook_script, generate_storybook_images_batch
 import json
 
 
@@ -146,29 +145,6 @@ def _migrate_sync_columns(app):
                 print(f"[DB] 删除列 {table_name}.{col_name} 时出错（可忽略）: {e}")
 
 
-def _fix_image_column_type():
-    """
-    修复 storybook_images.image_data 列类型为 LONGBLOB（MySQL）
-    解决大图片存储问题
-    """
-    from sqlalchemy import text
-
-    engine = db.engine
-    if not str(engine.url).startswith("mysql"):
-        return
-
-    try:
-        with engine.connect() as conn:
-            conn.execute(text(
-                "ALTER TABLE `storybook_images` MODIFY COLUMN `image_data` LONGBLOB NOT NULL"
-            ))
-            conn.commit()
-        print("[DB] 已将 storybook_images.image_data 列类型修改为 LONGBLOB")
-    except Exception as e:
-        if "Unknown column" not in str(e) and "doesn't exist" not in str(e):
-            print(f"[DB] 修改 image_data 列类型时出错（可忽略）: {e}")
-
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -180,7 +156,6 @@ def create_app():
     with app.app_context():
         db.create_all()
         _migrate_sync_columns(app)
-        _fix_image_column_type()
         print("[DB] 所有数据表已就绪（不存在的表已自动创建，列已同步）")
 
     return app
@@ -227,8 +202,7 @@ def result_page(session_id):
     session = DebateSession.query.get_or_404(session_id)
     topic = get_topic_by_id(session.topic_id)
     rounds = DebateRound.query.filter_by(session_id=session_id).order_by(DebateRound.round_number).all()
-    storybook = Storybook.query.filter_by(session_id=session_id).first()
-    return render_template('result.html', session=session, topic=topic, rounds=rounds, storybook=storybook)
+    return render_template('result.html', session=session, topic=topic, rounds=rounds)
 
 
 @app.route('/history')
@@ -678,225 +652,119 @@ def export_data():
 def storybook_page(session_id):
     """绘本展示页面"""
     session = DebateSession.query.get_or_404(session_id)
-    # 获取最新版本的绘本（按版本号降序）
-    storybook = Storybook.query.filter_by(session_id=session_id).order_by(Storybook.version.desc()).first()
-    # 获取所有版本
-    all_versions = Storybook.query.filter_by(session_id=session_id).filter(Storybook.status == 'completed').order_by(Storybook.version.desc()).all()
+    storybook = Storybook.query.filter_by(session_id=session_id).first()
     topic = get_topic_by_id(session.topic_id)
-    return render_template('storybook.html', session=session, storybook=storybook, all_versions=all_versions, topic=topic)
-
-
-def _generate_storybook_task(app_context, storybook_id, session_id, debate_history, topic_title, student_name, chosen_side_text):
-    """
-    后台线程：执行绘本生成任务
-    """
-    with app_context:
-        try:
-            storybook = db.session.get(Storybook, storybook_id)
-            if not storybook or storybook.status == 'cancelled':
-                print(f"[绘本任务] {storybook_id} 已取消或不存在")
-                return
-
-            print(f"[绘本任务] 开始生成分镜脚本: {storybook_id}")
-
-            # 步骤1：生成分镜脚本
-            scenes = generate_storybook_script(
-                config=app.config,
-                topic_title=topic_title,
-                side=chosen_side_text,
-                debate_history=debate_history,
-            )
-
-            # 检查是否被取消
-            storybook = db.session.get(Storybook, storybook_id)
-            if not storybook or storybook.status == 'cancelled':
-                print(f"[绘本任务] {storybook_id} 已取消")
-                return
-
-            if not scenes:
-                storybook.status = 'failed'
-                storybook.error_message = '分镜脚本生成失败'
-                db.session.commit()
-                print(f"[绘本任务] {storybook_id} 分镜生成失败")
-                return
-
-            # 保存分镜
-            storybook.set_scenes(scenes)
-            storybook.status = 'generating_images'
-            storybook.title = f"《{student_name}的心理成长故事》"
-            db.session.commit()
-            print(f"[绘本任务] {storybook_id} 分镜生成完成，开始生成图片")
-
-            # 步骤2：生成图片
-            scenes_with_images = generate_storybook_images_to_db(
-                config=app.config,
-                scenes=scenes,
-                storybook_id=storybook.id,
-                db_session=db.session,
-                ImageModel=StorybookImage,
-            )
-
-            # 再次检查是否被取消
-            storybook = db.session.get(Storybook, storybook_id)
-            if not storybook or storybook.status == 'cancelled':
-                print(f"[绘本任务] {storybook_id} 已取消")
-                return
-
-            # 更新完成状态
-            storybook.set_scenes(scenes_with_images)
-            storybook.status = 'completed'
-            db.session.commit()
-            print(f"[绘本任务] {storybook_id} 生成完成")
-
-        except Exception as e:
-            print(f"[绘本任务错误] {storybook_id}: {e}")
-            try:
-                storybook = db.session.get(Storybook, storybook_id)
-                if storybook and storybook.status not in ['cancelled', 'completed']:
-                    storybook.status = 'failed'
-                    storybook.error_message = str(e)[:500]
-                    db.session.commit()
-            except:
-                db.session.rollback()
+    return render_template('storybook.html', session=session, storybook=storybook, topic=topic)
 
 
 @app.route('/api/storybook/generate/<session_id>', methods=['POST'])
 def generate_storybook(session_id):
     """
-    启动绘本生成任务（异步）
-    立即返回，后台线程执行生成，前端轮询状态
+    生成心理绘本
+    1. 收集辩论历史
+    2. 调用 Gemini 生成分镜脚本
+    3. 调用豆包生成图片
     """
-    print(f"[绘本生成] 收到请求: session_id={session_id}")
-
-    try:
-        data = request.get_json(force=True, silent=True) or {}
-    except Exception as e:
-        print(f"[绘本生成] 解析 JSON 失败: {e}")
-        data = {}
-
-    force_new = data.get('force_new', False)
-
     session = DebateSession.query.get_or_404(session_id)
 
-    # 获取最新版本
-    latest = Storybook.query.filter_by(session_id=session_id).order_by(Storybook.version.desc()).first()
-
-    # 如果不强制新建，且已有完成的绘本，直接返回
-    if not force_new and latest and latest.status == 'completed':
+    # 检查是否已有绘本
+    existing = Storybook.query.filter_by(session_id=session_id).first()
+    if existing and existing.status == 'completed':
         return jsonify({
             "success": True,
-            "storybook_id": latest.id,
+            "storybook_id": existing.id,
             "message": "绘本已存在",
-            "storybook": latest.to_dict(),
+            "storybook": existing.to_dict(),
         })
 
-    # 如果最新的还在生成中且不是强制新建，返回当前状态
-    if not force_new and latest and latest.status in ['generating_script', 'generating_images']:
-        return jsonify({
-            "success": True,
-            "storybook_id": latest.id,
-            "message": "绘本正在生成中",
-            "status": latest.status,
-        })
-
-    # 计算新版本号
-    new_version = (latest.version + 1) if latest else 1
-
-    # 创建新版本绘本记录
-    storybook = Storybook(
-        session_id=session_id,
-        version=new_version,
-        status='generating_script'
-    )
-    db.session.add(storybook)
+    # 创建或更新绘本记录
+    if not existing:
+        storybook = Storybook(session_id=session_id, status='generating_script')
+        db.session.add(storybook)
+    else:
+        storybook = existing
+        storybook.status = 'generating_script'
+        storybook.error_message = None
     db.session.commit()
 
-    # 构建辩论历史（在主线程中准备数据）
-    debate_history = []
-    debate_history.append({
-        "round": 1,
-        "student": session.enhanced_argument or session.user_argument,
-        "ai": session.refutation,
-    })
-    for r in session.rounds:
+    try:
+        # 构建辩论历史
+        debate_history = []
+
+        # 第一轮
         debate_history.append({
-            "round": r.round_number,
-            "student": r.enhanced_argument or r.user_argument,
-            "ai": r.refutation,
+            "round": 1,
+            "student": session.enhanced_argument or session.user_argument,
+            "ai": session.refutation,
         })
 
-    # 启动后台线程执行生成任务
-    thread = threading.Thread(
-        target=_generate_storybook_task,
-        args=(
-            app.app_context(),
-            storybook.id,
-            session_id,
-            debate_history,
-            session.topic_title,
-            session.student_name,
-            session.chosen_side_text,
-        ),
-        daemon=True,
-    )
-    thread.start()
+        # 后续轮次
+        for r in session.rounds:
+            debate_history.append({
+                "round": r.round_number,
+                "student": r.enhanced_argument or r.user_argument,
+                "ai": r.refutation,
+            })
 
-    print(f"[绘本生成] 后台任务已启动: {storybook.id}")
+        # 步骤1：生成分镜脚本
+        scenes = generate_storybook_script(
+            config=app.config,
+            topic_title=session.topic_title,
+            side=session.chosen_side_text,
+            debate_history=debate_history,
+        )
 
-    # 立即返回，告知前端开始轮询
-    return jsonify({
-        "success": True,
-        "storybook_id": storybook.id,
-        "message": "绘本生成已开始",
-        "status": "generating_script",
-    })
+        if not scenes:
+            storybook.status = 'failed'
+            storybook.error_message = '分镜脚本生成失败'
+            db.session.commit()
+            return jsonify({"success": False, "message": "分镜脚本生成失败"}), 500
+
+        # 保存分镜（此时还没有图片）
+        storybook.set_scenes(scenes)
+        storybook.status = 'generating_images'
+
+        # 从第一个分镜的标题推断绘本标题
+        if scenes and scenes[0].get('title'):
+            storybook.title = f"《{session.student_name}的心理成长故事》"
+
+        db.session.commit()
+
+        # 步骤2：生成图片
+        scenes_with_images = generate_storybook_images_batch(app.config, scenes)
+
+        # 更新分镜数据（含图片URL）
+        storybook.set_scenes(scenes_with_images)
+        storybook.status = 'completed'
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "storybook_id": storybook.id,
+            "message": "绘本生成成功",
+            "storybook": storybook.to_dict(),
+        })
+
+    except Exception as e:
+        storybook.status = 'failed'
+        storybook.error_message = str(e)
+        db.session.commit()
+        return jsonify({"success": False, "message": f"绘本生成失败: {str(e)}"}), 500
 
 
 @app.route('/api/storybook/status/<session_id>', methods=['GET'])
 def storybook_status(session_id):
-    """查询绘本生成状态（返回最新版本）"""
-    from datetime import datetime, timedelta
-
-    storybook = Storybook.query.filter_by(session_id=session_id).order_by(Storybook.version.desc()).first()
+    """查询绘本生成状态"""
+    storybook = Storybook.query.filter_by(session_id=session_id).first()
     if not storybook:
         return jsonify({"success": True, "status": "not_started", "storybook": None})
-
-    # 检测卡住的绘本（超过10分钟还在生成中，视为失败）
-    if storybook.status in ['generating_script', 'generating_images']:
-        if storybook.created_at and datetime.utcnow() - storybook.created_at > timedelta(minutes=10):
-            storybook.status = 'failed'
-            storybook.error_message = '生成超时，请重新尝试'
-            db.session.commit()
-            print(f"[绘本状态] {storybook.id} 因超时标记为失败")
-
-    # 获取所有已完成的版本
-    all_versions = Storybook.query.filter_by(session_id=session_id).filter(Storybook.status == 'completed').order_by(Storybook.version.desc()).all()
 
     return jsonify({
         "success": True,
         "status": storybook.status,
         "storybook": storybook.to_dict() if storybook.status == 'completed' else None,
         "error_message": storybook.error_message,
-        "all_versions": [{"id": v.id, "version": v.version, "created_at": v.created_at.isoformat()} for v in all_versions],
     })
-
-
-@app.route('/api/storybook/cancel/<session_id>', methods=['POST'])
-def cancel_storybook(session_id):
-    """取消绘本生成"""
-    storybook = Storybook.query.filter_by(session_id=session_id).order_by(Storybook.version.desc()).first()
-
-    if not storybook:
-        return jsonify({"success": False, "message": "未找到绘本记录"})
-
-    if storybook.status in ['generating_script', 'generating_images']:
-        storybook.status = 'cancelled'
-        storybook.error_message = '用户取消生成'
-        db.session.commit()
-        print(f"[绘本取消] {storybook.id} 已取消")
-        return jsonify({"success": True, "message": "已取消生成"})
-
-    return jsonify({"success": True, "message": "生成未在进行中"})
 
 
 @app.route('/api/storybook/<storybook_id>', methods=['GET'])
@@ -907,31 +775,6 @@ def get_storybook(storybook_id):
         "success": True,
         "storybook": storybook.to_dict(),
     })
-
-
-@app.route('/api/storybook/image/<image_id>')
-def get_storybook_image(image_id):
-    """获取绘本图片（从数据库读取并返回）"""
-    from flask import Response
-
-    image = StorybookImage.query.get_or_404(image_id)
-
-    content_type_map = {
-        'png': 'image/png',
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'webp': 'image/webp',
-        'gif': 'image/gif',
-    }
-    content_type = content_type_map.get(image.image_format, 'image/png')
-
-    return Response(
-        image.image_data,
-        mimetype=content_type,
-        headers={
-            'Cache-Control': 'public, max-age=31536000',
-        }
-    )
 
 
 if __name__ == '__main__':

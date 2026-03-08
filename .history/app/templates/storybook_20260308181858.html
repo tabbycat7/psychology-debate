@@ -1,0 +1,1024 @@
+{% extends "base.html" %}
+
+{% block title %}我的心理绘本{% endblock %}
+
+{% block extra_head %}
+<style>
+    .storybook-container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .storybook-header {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: var(--radius-xl);
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .storybook-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+        animation: shimmer 8s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+
+        0%,
+        100% {
+            transform: translate(0, 0);
+        }
+
+        50% {
+            transform: translate(25%, 25%);
+        }
+    }
+
+    .storybook-header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .storybook-title {
+        font-size: 32px;
+        font-weight: 800;
+        margin-bottom: 12px;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .storybook-subtitle {
+        font-size: 16px;
+        opacity: 0.9;
+    }
+
+    .storybook-meta {
+        display: flex;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 20px;
+        font-size: 14px;
+        opacity: 0.85;
+    }
+
+    .storybook-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    /* 生成状态区域 */
+    .generate-section {
+        text-align: center;
+        padding: 60px 20px;
+        background: var(--bg-card);
+        border-radius: var(--radius-xl);
+        border: 2px dashed var(--border-color);
+        margin-bottom: 30px;
+    }
+
+    .generate-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+
+    .generate-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 12px;
+    }
+
+    .generate-desc {
+        font-size: 15px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .generate-btn {
+        padding: 16px 40px;
+        font-size: 18px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .generate-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    }
+
+    .generate-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* 加载动画 */
+    .loading-section {
+        text-align: center;
+        padding: 80px 20px;
+    }
+
+    .loading-spinner {
+        width: 80px;
+        height: 80px;
+        border: 4px solid rgba(102, 126, 234, 0.2);
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 24px;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .loading-text {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 8px;
+    }
+
+    .loading-subtext {
+        font-size: 14px;
+        color: var(--text-secondary);
+    }
+
+    /* 绘本展示区域 */
+    .storybook-viewer {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    /* 翻页模式 - 左右布局 */
+    .page-viewer {
+        background: var(--bg-card);
+        border-radius: var(--radius-xl);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .page-content {
+        display: none;
+        animation: pageFadeIn 0.5s ease-out;
+    }
+
+    .page-content.active {
+        display: flex;
+        flex-direction: row;
+    }
+
+    @keyframes pageFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .page-image-wrapper {
+        position: relative;
+        flex: 0 0 45%;
+        max-width: 45%;
+        aspect-ratio: 1 / 1;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        overflow: hidden;
+    }
+
+    .page-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+        cursor: zoom-in;
+    }
+
+    .page-image:hover {
+        transform: scale(1.02);
+    }
+
+    .page-image-placeholder {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 48px;
+        opacity: 0.5;
+    }
+
+    .page-number {
+        position: absolute;
+        bottom: 12px;
+        right: 12px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .page-text-area {
+        flex: 1;
+        padding: 30px;
+        background: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .page-scene-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* 移动端切换为上下布局 */
+    @media (max-width: 768px) {
+        .page-content.active {
+            flex-direction: column;
+        }
+
+        .page-image-wrapper {
+            flex: none;
+            max-width: 100%;
+            width: 100%;
+            aspect-ratio: 4 / 3;
+        }
+
+        .page-text-area {
+            padding: 20px;
+        }
+
+        .page-scene-title {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+    }
+
+    .page-description {
+        font-size: 17px;
+        line-height: 2;
+        color: var(--text-primary);
+        font-family: 'Noto Serif SC', serif, system-ui;
+        letter-spacing: 0.5px;
+    }
+
+    /* 翻页控制 */
+    .page-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+
+    .page-btn {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid var(--border-color);
+        background: var(--bg-card);
+        font-size: 20px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-btn:hover:not(:disabled) {
+        background: #667eea;
+        border-color: #667eea;
+        color: white;
+        transform: scale(1.1);
+    }
+
+    .page-btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+
+    .page-indicator {
+        display: flex;
+        gap: 8px;
+    }
+
+    .page-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border-color);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .page-dot.active {
+        background: #667eea;
+        transform: scale(1.3);
+    }
+
+    .page-dot:hover {
+        background: #764ba2;
+    }
+
+    /* 缩略图导航 */
+    .thumbnails-nav {
+        display: flex;
+        gap: 12px;
+        overflow-x: auto;
+        padding: 16px;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+        margin-bottom: 30px;
+    }
+
+    .thumbnail-item {
+        flex-shrink: 0;
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: all 0.2s;
+        position: relative;
+    }
+
+    .thumbnail-item.active {
+        border-color: #667eea;
+        transform: scale(1.05);
+    }
+
+    .thumbnail-item:hover {
+        border-color: #764ba2;
+    }
+
+    .thumbnail-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .thumbnail-number {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    /* 操作按钮区 */
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 50px;
+    }
+
+    /* 错误提示 */
+    .error-section {
+        text-align: center;
+        padding: 60px 20px;
+        background: rgba(245, 108, 108, 0.08);
+        border-radius: var(--radius-xl);
+        border: 2px solid rgba(245, 108, 108, 0.2);
+        margin-bottom: 30px;
+    }
+
+    .error-icon {
+        font-size: 64px;
+        margin-bottom: 20px;
+    }
+
+    .error-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--danger);
+        margin-bottom: 12px;
+    }
+
+    .error-message {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+    }
+
+    /* 版本选择器 */
+    .version-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 12px 20px;
+        background: var(--bg-card);
+        border-radius: var(--radius-lg);
+    }
+
+    .version-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+
+    .version-select {
+        padding: 8px 16px;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        background: white;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .version-select:hover {
+        border-color: #667eea;
+    }
+
+    .version-select:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    }
+
+    /* 重新生成区域 */
+    .regenerate-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 20px;
+        padding: 20px;
+        background: rgba(102, 126, 234, 0.04);
+        border-radius: var(--radius-lg);
+        border: 1px dashed rgba(102, 126, 234, 0.3);
+    }
+
+    .regenerate-btn {
+        padding: 12px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        background: white;
+        color: #667eea;
+        border: 2px solid #667eea;
+        border-radius: 9999px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .regenerate-btn:hover:not(:disabled) {
+        background: #667eea;
+        color: white;
+    }
+
+    .regenerate-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .regenerate-hint {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+
+    /* 响应式 */
+    @media (max-width: 640px) {
+        .storybook-title {
+            font-size: 24px;
+        }
+
+        .page-description {
+            font-size: 16px;
+        }
+
+        .page-text-area {
+            padding: 20px;
+        }
+
+        .thumbnails-nav {
+            padding: 12px;
+        }
+
+        .thumbnail-item {
+            width: 60px;
+            height: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="storybook-container">
+    <!-- 绘本头部 -->
+    <div class="storybook-header">
+        <div class="storybook-header-content">
+            <div class="storybook-title" id="storybookTitle">
+                {% if storybook and storybook.title %}
+                {{ storybook.title }}
+                {% else %}
+                📚 {{ session.student_name }}的心理成长绘本
+                {% endif %}
+            </div>
+            <div class="storybook-subtitle">基于「{{ session.topic_title[:30] }}...」的辩论创作</div>
+            <div class="storybook-meta">
+                <div class="storybook-meta-item">
+                    <span>👤</span>
+                    <span>{{ session.student_name }}</span>
+                </div>
+                <div class="storybook-meta-item">
+                    <span>💬</span>
+                    <span>共 {{ session.total_rounds }} 轮辩论</span>
+                </div>
+                <div class="storybook-meta-item">
+                    <span>📅</span>
+                    <span>{{ session.created_at.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 版本选择器（多版本时显示） -->
+    {% if all_versions and all_versions|length > 1 %}
+    <div class="version-selector" id="versionSelector">
+        <span class="version-label">📚 版本：</span>
+        <select class="version-select" id="versionSelect" onchange="switchVersion(this.value)">
+            {% for v in all_versions %}
+            <option value="{{ v.id }}" {% if storybook and v.id==storybook.id %}selected{% endif %}>
+                第 {{ v.version }} 版 ({{ v.created_at.strftime('%m-%d %H:%M') }})
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endif %}
+
+    <!-- 主内容区域 -->
+    <div id="mainContent">
+        {% if storybook and storybook.status == 'completed' %}
+        <!-- 绘本已生成，显示内容 -->
+        <div class="storybook-viewer" id="storybookViewer">
+            <!-- 缩略图导航 -->
+            <div class="thumbnails-nav" id="thumbnailsNav"></div>
+
+            <!-- 翻页浏览器 -->
+            <div class="page-viewer" id="pageViewer"></div>
+
+            <!-- 翻页控制 -->
+            <div class="page-controls">
+                <button class="page-btn" id="prevBtn" onclick="prevPage()">◀</button>
+                <div class="page-indicator" id="pageIndicator"></div>
+                <button class="page-btn" id="nextBtn" onclick="nextPage()">▶</button>
+            </div>
+
+            <!-- 重新生成按钮 -->
+            <div class="regenerate-section">
+                <button class="regenerate-btn" id="regenerateBtn" onclick="regenerateStorybook()">
+                    🔄 生成新版本
+                </button>
+                <span class="regenerate-hint">当前为第 {{ storybook.version }} 版，可生成新版本</span>
+            </div>
+        </div>
+        {% elif storybook and storybook.status == 'failed' %}
+        <!-- 生成失败 -->
+        <div class="error-section">
+            <div class="error-icon">😢</div>
+            <div class="error-title">绘本生成失败了</div>
+            <div class="error-message">{{ storybook.error_message or '未知错误，请稍后重试' }}</div>
+            <button class="generate-btn" onclick="generateStorybook()">🔄 重新生成</button>
+        </div>
+        {% elif storybook and storybook.status in ['generating_script', 'generating_images'] %}
+        <!-- 正在生成中 -->
+        <div class="loading-section" id="loadingSection">
+            <div class="loading-spinner"></div>
+            <div class="loading-text" id="loadingText">
+                {% if storybook.status == 'generating_script' %}
+                ✨ 正在编写绘本故事...
+                {% else %}
+                🎨 正在绘制插画...
+                {% endif %}
+            </div>
+            <div class="loading-subtext">这可能需要 1-2 分钟，请耐心等待</div>
+        </div>
+        {% else %}
+        <!-- 未生成，显示生成按钮 -->
+        <div class="generate-section" id="generateSection">
+            <div class="generate-icon">🎨</div>
+            <div class="generate-title">生成专属心理绘本</div>
+            <div class="generate-desc">
+                AI 将根据你的辩论内容，创作一本独一无二的心理成长绘本，记录这段思考之旅
+            </div>
+            <button class="generate-btn" id="generateBtn" onclick="generateStorybook()">
+                ✨ 开始生成绘本
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="action-buttons">
+        <a href="{{ url_for('result_page', session_id=session.id) }}" class="btn btn-outline">📋 查看辩论详情</a>
+        <a href="{{ url_for('index') }}" class="btn btn-primary">🎭 再来一场辩论</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const sessionId = "{{ session.id }}";
+    let currentPage = 0;
+    let scenes = [];
+    let currentStorybookId = "{{ storybook.id if storybook else '' }}";
+
+    {% if storybook and storybook.status == 'completed' %}
+    // 已有绘本数据，直接渲染
+    scenes = {{ storybook.scenes_json | safe }};
+    renderStorybook();
+    {% elif storybook and storybook.status in ['generating_script', 'generating_images'] %}
+    // 正在生成中，轮询状态
+    pollStatus();
+    {% endif %}
+
+    // 切换版本
+    async function switchVersion(storybookId) {
+        if (!storybookId || storybookId === currentStorybookId) return;
+
+        try {
+            const response = await fetch(`/api/storybook/${storybookId}`);
+            const data = await response.json();
+
+            if (data.success && data.storybook) {
+                currentStorybookId = storybookId;
+                scenes = data.storybook.scenes;
+                currentPage = 0;
+                renderStorybook();
+                showToast(`已切换到第 ${data.storybook.version} 版`, 'success');
+
+                // 更新重新生成区域的提示
+                const hint = document.querySelector('.regenerate-hint');
+                if (hint) {
+                    hint.textContent = `当前为第 ${data.storybook.version} 版，可生成新版本`;
+                }
+            }
+        } catch (error) {
+            console.error('切换版本失败:', error);
+            showToast('切换版本失败', 'error');
+        }
+    }
+
+    // 重新生成（创建新版本）
+    async function regenerateStorybook() {
+        const btn = document.getElementById('regenerateBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 准备生成新版本...';
+        }
+
+        // 显示加载区域
+        document.getElementById('mainContent').innerHTML = `
+            <div class="loading-section" id="loadingSection">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">✨ 正在编写新版绘本故事...</div>
+                <div class="loading-subtext">这可能需要 1-2 分钟，请耐心等待</div>
+            </div>
+        `;
+
+        // 隐藏版本选择器
+        const versionSelector = document.getElementById('versionSelector');
+        if (versionSelector) versionSelector.style.display = 'none';
+
+        try {
+            const response = await fetch(`/api/storybook/generate/${sessionId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ force_new: true }),
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('API Error:', response.status, text);
+                try {
+                    const errData = JSON.parse(text);
+                    showError(errData.message || `服务器错误 (${response.status})`);
+                } catch {
+                    showError(`服务器错误 (${response.status})`);
+                }
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                currentStorybookId = data.storybook.id;
+                scenes = data.storybook.scenes;
+                currentPage = 0;
+                showStorybookViewer();
+                renderStorybook();
+                showToast(`🎉 新版本生成成功！（第 ${data.storybook.version} 版）`, 'success');
+                // 刷新页面以更新版本列表
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showError(data.message || '生成失败');
+            }
+        } catch (error) {
+            console.error(error);
+            showError(error.message || '网络错误');
+        }
+    }
+
+    async function generateStorybook() {
+        const btn = document.getElementById('generateBtn');
+        const section = document.getElementById('generateSection');
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ 准备生成...';
+        }
+
+        // 显示加载区域
+        document.getElementById('mainContent').innerHTML = `
+            <div class="loading-section" id="loadingSection">
+                <div class="loading-spinner"></div>
+                <div class="loading-text" id="loadingText">✨ 正在编写绘本故事...</div>
+                <div class="loading-subtext">这可能需要 1-2 分钟，请耐心等待</div>
+            </div>
+        `;
+
+        try {
+            const response = await fetch(`/api/storybook/generate/${sessionId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}),
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                console.error('API Error:', response.status, text);
+                try {
+                    const errData = JSON.parse(text);
+                    showError(errData.message || `服务器错误 (${response.status})`);
+                } catch {
+                    showError(`服务器错误 (${response.status})`);
+                }
+                return;
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (data.status && data.status !== 'completed') {
+                    // 正在生成中，开始轮询
+                    pollStatus();
+                } else if (data.storybook && data.storybook.scenes) {
+                    scenes = data.storybook.scenes;
+                    showStorybookViewer();
+                    renderStorybook();
+                    showToast('🎉 绘本生成成功！', 'success');
+                } else {
+                    // 开始生成，轮询状态
+                    pollStatus();
+                }
+            } else {
+                showError(data.message || '生成失败');
+            }
+        } catch (error) {
+            console.error(error);
+            showError(error.message || '网络错误');
+        }
+    }
+
+    function pollStatus() {
+        const interval = setInterval(async () => {
+            try {
+                const response = await fetch(`/api/storybook/status/${sessionId}`);
+                const data = await response.json();
+
+                if (data.status === 'completed') {
+                    clearInterval(interval);
+                    scenes = data.storybook.scenes;
+                    showStorybookViewer();
+                    renderStorybook();
+                    showToast('🎉 绘本生成成功！', 'success');
+                } else if (data.status === 'failed') {
+                    clearInterval(interval);
+                    const hasOldVersions = data.all_versions && data.all_versions.length > 0;
+                    showError(data.error_message || '生成失败', hasOldVersions);
+                } else if (data.status === 'generating_images') {
+                    const loadingText = document.getElementById('loadingText');
+                    if (loadingText) loadingText.textContent = '🎨 正在绘制插画...';
+                } else if (data.status === 'generating_script') {
+                    const loadingText = document.getElementById('loadingText');
+                    if (loadingText) loadingText.textContent = '✨ 正在编写绘本故事...';
+                }
+            } catch (e) {
+                console.error('Poll error:', e);
+            }
+        }, 10000);
+    }
+
+    function showStorybookViewer() {
+        document.getElementById('mainContent').innerHTML = `
+            <div class="storybook-viewer" id="storybookViewer">
+                <div class="thumbnails-nav" id="thumbnailsNav"></div>
+                <div class="page-viewer" id="pageViewer"></div>
+                <div class="page-controls">
+                    <button class="page-btn" id="prevBtn" onclick="prevPage()">◀</button>
+                    <div class="page-indicator" id="pageIndicator"></div>
+                    <button class="page-btn" id="nextBtn" onclick="nextPage()">▶</button>
+                </div>
+                <div class="regenerate-section">
+                    <button class="regenerate-btn" id="regenerateBtn" onclick="regenerateStorybook()">
+                        🔄 生成新版本
+                    </button>
+                    <span class="regenerate-hint">可生成新版本，旧版本会保留</span>
+                </div>
+            </div>
+        `;
+    }
+
+    function showError(message, hasOldVersions = false) {
+        let html = `
+            <div class="error-section">
+                <div class="error-icon">😢</div>
+                <div class="error-title">绘本生成失败了</div>
+                <div class="error-message">${message}</div>
+                <button class="generate-btn" onclick="generateStorybook()">🔄 重新生成</button>
+        `;
+
+        if (hasOldVersions) {
+            html += `<p style="margin-top: 15px; color: #666;">您可以在上方版本选择器中查看已有版本</p>`;
+        }
+
+        html += `</div>`;
+        document.getElementById('mainContent').innerHTML = html;
+
+        // 确保版本选择器可见
+        const versionSelector = document.getElementById('versionSelector');
+        if (versionSelector) versionSelector.style.display = '';
+    }
+
+    function renderStorybook() {
+        if (!scenes || scenes.length === 0) return;
+
+        const viewer = document.getElementById('pageViewer');
+        const thumbnails = document.getElementById('thumbnailsNav');
+        const indicator = document.getElementById('pageIndicator');
+
+        // 清空
+        viewer.innerHTML = '';
+        thumbnails.innerHTML = '';
+        indicator.innerHTML = '';
+
+        scenes.forEach((scene, index) => {
+            // 页面内容
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'page-content' + (index === 0 ? ' active' : '');
+            pageDiv.dataset.page = index;
+
+            // 优先使用 image_id（数据库存储），其次 image_url（兼容旧数据）
+            let imageUrl = '';
+            let hasImage = false;
+
+            if (scene.image_id) {
+                imageUrl = `/api/storybook/image/${scene.image_id}`;
+                hasImage = true;
+            } else if (scene.image_url && !scene.image_url.startsWith('[')) {
+                imageUrl = scene.image_url;
+                if (!imageUrl.startsWith('http')) {
+                    imageUrl = '/static/' + imageUrl;
+                }
+                hasImage = true;
+            }
+
+            pageDiv.innerHTML = `
+                <div class="page-image-wrapper">
+                    ${hasImage
+                    ? `<img src="${imageUrl}" class="page-image" alt="第${scene.scene}页插画" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+                           <div class="page-image-placeholder" style="display:none;">🖼️</div>`
+                    : `<div class="page-image-placeholder">🖼️</div>`
+                }
+                    <div class="page-number">${scene.scene} / ${scenes.length}</div>
+                </div>
+                <div class="page-text-area">
+                    <div class="page-scene-title">
+                        <span>📖</span>
+                        <span>${scene.title || '第' + scene.scene + '页'}</span>
+                    </div>
+                    <div class="page-description">${scene.description}</div>
+                </div>
+            `;
+
+            viewer.appendChild(pageDiv);
+
+            // 缩略图
+            const thumb = document.createElement('div');
+            thumb.className = 'thumbnail-item' + (index === 0 ? ' active' : '');
+            thumb.onclick = () => goToPage(index);
+            thumb.innerHTML = `
+                ${hasImage
+                    ? `<img src="${imageUrl}" class="thumbnail-img" alt="缩略图">`
+                    : `<div style="width:100%;height:100%;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:24px;">📖</div>`
+                }
+                <div class="thumbnail-number">${scene.scene}</div>
+            `;
+            thumbnails.appendChild(thumb);
+
+            // 指示点
+            const dot = document.createElement('div');
+            dot.className = 'page-dot' + (index === 0 ? ' active' : '');
+            dot.onclick = () => goToPage(index);
+            indicator.appendChild(dot);
+        });
+
+        updatePageButtons();
+    }
+
+    function goToPage(index) {
+        if (index < 0 || index >= scenes.length) return;
+
+        currentPage = index;
+
+        // 更新页面显示
+        document.querySelectorAll('.page-content').forEach((p, i) => {
+            p.classList.toggle('active', i === index);
+        });
+
+        // 更新缩略图
+        document.querySelectorAll('.thumbnail-item').forEach((t, i) => {
+            t.classList.toggle('active', i === index);
+        });
+
+        // 更新指示点
+        document.querySelectorAll('.page-dot').forEach((d, i) => {
+            d.classList.toggle('active', i === index);
+        });
+
+        updatePageButtons();
+
+        // 滚动缩略图到可见
+        const activeThumb = document.querySelector('.thumbnail-item.active');
+        if (activeThumb) {
+            activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 0) {
+            goToPage(currentPage - 1);
+        }
+    }
+
+    function nextPage() {
+        if (currentPage < scenes.length - 1) {
+            goToPage(currentPage + 1);
+        }
+    }
+
+    function updatePageButtons() {
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        if (prevBtn) prevBtn.disabled = currentPage === 0;
+        if (nextBtn) nextBtn.disabled = currentPage === scenes.length - 1;
+    }
+
+    // 键盘导航
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') prevPage();
+        if (e.key === 'ArrowRight') nextPage();
+    });
+</script>
+{% endblock %}

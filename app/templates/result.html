@@ -358,7 +358,12 @@
     {% endfor %}
 
     <!-- 操作按钮 -->
-    <div class="text-center mt-8" style="display: flex; justify-content: center; gap: 16px;">
+    <div class="text-center mt-8" style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+        {% if storybook and storybook.status == 'completed' %}
+        <a href="{{ url_for('storybook_page', session_id=session.id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">📖 查看心理绘本</a>
+        {% else %}
+        <a href="{{ url_for('storybook_page', session_id=session.id) }}" class="btn btn-primary" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">📚 生成心理绘本</a>
+        {% endif %}
         <a href="{{ url_for('index') }}" class="btn btn-primary">🎭 再来一场辩论</a>
         <a href="{{ url_for('history_page') }}" class="btn btn-outline">📋 查看历史记录</a>
     </div>
